@@ -1,0 +1,7 @@
+.DS_Store
+assets/app/*
+node_modules
+npm-debug.log
+dist
+.idea
+server/config.json
