@@ -102,11 +102,11 @@ const parseRepo = (repository = '') => {
 /*
  * Get rules tree.
  */
-const getRulesTree = (projectId, branch) =>
+const getRulesTree = (projectId, branch, sha) =>
 	new Promise((resolve, reject) => {
 		try {
 			gitlab.projects.repository.listTree(projectId, {
-				ref_name: branch,
+				ref_name: sha || branch,
 				path: constants.RULES_DIRECTORY
 			}, (res, err) => {
 				if (err) {
@@ -164,11 +164,11 @@ const getConnectionTreeByPath = (projectId, branch, path) =>
 /*
  * Get all files for all database-connections.
  */
-const getConnectionsTree = (projectId, branch) =>
+const getConnectionsTree = (projectId, branch, sha) =>
 	new Promise((resolve, reject) => {
 		try {
 			gitlab.projects.repository.listTree(projectId, {
-				ref_name: branch,
+				ref_name: sha || branch,
 				path: constants.DATABASE_CONNECTIONS_DIRECTORY
 			}, (res, err) => {
 				if (err) {
@@ -182,7 +182,7 @@ const getConnectionsTree = (projectId, branch) =>
 				let files = [];
 
 				subdirs.forEach(subdir => {
-					promisses.push(getConnectionTreeByPath(projectId, branch, subdir.name).then(data => {
+					promisses.push(getConnectionTreeByPath(projectId, sha || branch, subdir.name).then(data => {
 						files = files.concat(data);
 					}));
 				});
@@ -198,11 +198,11 @@ const getConnectionsTree = (projectId, branch) =>
 /*
  * Get full tree.
  */
-const getTree = (projectId, branch) => {
+const getTree = (projectId, branch, sha) => {
 	//Getting separate trees for rules and connections, as GitLab does not provide full (recursive) tree
 	const promises = {
-		rules: getRulesTree(projectId, branch),
-		connections: getConnectionsTree(projectId, branch)
+		rules: getRulesTree(projectId, branch, sha),
+		connections: getConnectionsTree(projectId, branch, sha)
 	};
 
 	return Promise.props(promises)
@@ -336,14 +336,14 @@ const getDatabaseScripts = (projectId, branch, files) => {
 /*
  * Get a list of all changes that need to be applied to rules and database scripts.
  */
-export const getChanges = (projectId, branch) =>
-	getTree(projectId, branch)
+export const getChanges = (projectId, branch, sha) =>
+	getTree(projectId, branch, sha)
 		.then(files => {
 			logger.debug(`Files in tree: ${JSON.stringify(files.map(file => ({name: file.path, id: file.id})), null, 2)}`);
 
 			const promises = {
-				rules: getRules(projectId, branch, files),
-				databases: getDatabaseScripts(projectId, branch, files)
+				rules: getRules(projectId, sha || branch, files),
+				databases: getDatabaseScripts(projectId, sha || branch, files)
 			};
 
 			return Promise.props(promises)

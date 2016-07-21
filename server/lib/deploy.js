@@ -41,7 +41,7 @@ export default (storageContext, id, project_id, branch, repository, sha, user) =
   }
 
   progress.log('Loading GitLab tree...');
-  return getChanges(project_id, branch)
+  return getChanges(project_id, branch, sha)
     .then(context => {
       progress.log(`Assets: ${JSON.stringify({ id, user, ...context }, null, 2)}`);
       progress.log(`Getting access token for ${config('AUTH0_CLIENT_ID')}/${config('AUTH0_DOMAIN')}`);
