@@ -2,7 +2,6 @@ import _ from 'lodash';
 import path from 'path';
 import Promise from 'bluebird';
 import GitLabApi from 'gitlab';
-import request from 'request-promise';
 
 import config from './config';
 import logger from '../lib/logger';
@@ -50,16 +49,13 @@ const getDatabaseScriptDetails = (filename) => {
 /*
  * Only Javascript and JSON files for Rules.
  */
-const validRulesOnly = (fileName) => {
-	return /\.(js|json)$/i.test(fileName);
-};
+const validRulesOnly = (fileName) => /\.(js|json)$/i.test(fileName);
 
 /*
  * Only valid Javascript for Connections.
  */
-const validConnectionsOnly = (fileName) => {
-	return /\.(js)$/i.test(fileName);
-};
+const validConnectionsOnly = (fileName) => /\.(js)$/i.test(fileName);
+
 
 /*
  * Only Javascript and JSON files.
@@ -115,25 +111,19 @@ const getRulesTree = (projectId, branch) =>
 			}, (res, err) => {
 				if (err) {
 					return reject(err);
-				}
-
-				if (!res) {
+				} else if (!res) {
 					return resolve([]);
 				}
 
-				try {
-					const files = res
-						.filter(f => f.type === 'blob')
-						.filter(f => validRulesOnly(f.name));
+				const files = res
+					.filter(f => f.type === 'blob')
+					.filter(f => validRulesOnly(f.name));
 
-					files.forEach((elem, idx) => {
-						files[idx].path = `${constants.RULES_DIRECTORY}/${elem.name}`
-					});
+				files.forEach((elem, idx) => {
+					files[idx].path = `${constants.RULES_DIRECTORY}/${elem.name}`
+				});
 
-					return resolve(files);
-				} catch (mappingError) {
-					return reject(mappingError);
-				}
+				return resolve(files);
 			});
 		} catch (e) {
 			reject(e);
@@ -152,21 +142,19 @@ const getConnectionTreeByPath = (projectId, branch, path) =>
 			}, (res, err) => {
 				if (err) {
 					return reject(err);
+				} else if (!res) {
+					return resolve([]);
 				}
 
-				try {
-					const files = res
-						.filter(f => f.type === 'blob')
-						.filter(f => validConnectionsOnly(f.name));
+				const files = res
+					.filter(f => f.type === 'blob')
+					.filter(f => validConnectionsOnly(f.name));
 
-					files.forEach((elem, idx) => {
-						files[idx].path = `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${path}/${elem.name}`
-					});
+				files.forEach((elem, idx) => {
+					files[idx].path = `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${path}/${elem.name}`
+				});
 
-					return resolve(files);
-				} catch (mappingError) {
-					return reject(mappingError);
-				}
+				return resolve(files);
 			});
 		} catch (e) {
 			reject(e);
@@ -185,25 +173,22 @@ const getConnectionsTree = (projectId, branch) =>
 			}, (res, err) => {
 				if (err) {
 					return reject(err);
+				} else if (!res) {
+					return resolve([]);
 				}
 
-				try {
-					const subdirs = res.filter(f => f.type === 'tree');
-					const promisses = [];
-					let files = [];
+				const subdirs = res.filter(f => f.type === 'tree');
+				const promisses = [];
+				let files = [];
 
-					subdirs.forEach(subdir => {
-						promisses.push(getConnectionTreeByPath(projectId, branch, subdir.name).then(data => {
-							files = _.union(files, data);
-						}));
-					});
+				subdirs.forEach(subdir => {
+					promisses.push(getConnectionTreeByPath(projectId, branch, subdir.name).then(data => {
+						files = files.concat(data);
+					}));
+				});
 
-					Promise.all(promisses)
-						.then(() => resolve(files));
-
-				} catch (mappingError) {
-					return reject(mappingError);
-				}
+				Promise.all(promisses)
+					.then(() => resolve(files));
 			});
 		} catch (e) {
 			reject(e);
@@ -230,7 +215,7 @@ const getTree = (projectId, branch) => {
 const downloadFile = (projectId, branch, file) =>
 	new Promise((resolve, reject) => {
 		try {
-			return gitlab.projects.repository.showFile(projectId, {ref: branch, file_path: file.path}, (data, err) => {
+			gitlab.projects.repository.showFile(projectId, {ref: branch, file_path: file.path}, (data, err) => {
 				if (data) {
 					return resolve({
 						fileName: file.path,
@@ -284,7 +269,6 @@ const getRules = (projectId, branch, files) => {
 	// Rules object.
 	const rules = {};
 
-	// Determine if we have the script, the metadata or both.
 	_.filter(files, f => isRule(f.path)).forEach(file => {
 		const ruleName = path.parse(file.path).name;
 		rules[ruleName] = rules[ruleName] || {};
@@ -312,6 +296,7 @@ const downloadDatabaseScript = (projectId, branch, databaseName, scripts) => {
 	};
 
 	const downloads = [];
+
 	scripts.forEach(script => {
 		downloads.push(downloadFile(projectId, branch, script)
 			.then(file => {
@@ -333,7 +318,6 @@ const downloadDatabaseScript = (projectId, branch, databaseName, scripts) => {
 const getDatabaseScripts = (projectId, branch, files) => {
 	const databases = {};
 
-	// Determine if we have the script, the metadata or both.
 	_.filter(files, f => isDatabaseConnection(f.path)).forEach(file => {
 		const script = getDatabaseScriptDetails(file.path);
 		if (script) {
@@ -376,6 +360,9 @@ export const getProjectId = (path) =>
 	new Promise((resolve, reject) => {
 		try {
 			gitlab.projects.all(projects => {
+				if (!projects)
+					return reject(new Error('Unable to determine project ID'));
+
 				const currentProject = projects.filter(f => f.path_with_namespace === path);
 
 				if (currentProject[0] && currentProject[0].id)

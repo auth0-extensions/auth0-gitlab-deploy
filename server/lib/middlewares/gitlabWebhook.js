@@ -1,9 +1,3 @@
-import crypto from 'crypto';
-import { ArgumentError, UnauthorizedError } from '../errors';
-
-const calculateSignature = (key, blob) =>
-  `sha1=${crypto.createHmac('sha1', key).update(blob).digest('hex')}`;
-
 const parse = (headers, { ref = '', commits = [], project = {}, project_id = '', user_email = '', event_name = '', checkout_sha = ''}) => {
   const refParts = ref.split('/');
 
@@ -13,7 +7,7 @@ const parse = (headers, { ref = '', commits = [], project = {}, project_id = '',
     event: event_name,
     branch: refParts.length === 3 ? refParts[2] : '',
     commits,
-    repository: project.name,
+    repository: project.path_with_namespace,
     user: user_email,
     sha: checkout_sha
   };
