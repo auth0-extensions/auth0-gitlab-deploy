@@ -34,14 +34,18 @@ const trackProgress = (id, branch, repository, sha, user) => {
 
 export default (storageContext, id, project_id, branch, repository, sha, user) => {
   const progress = trackProgress(id, branch, repository, sha, user);
+  let version;
+
   if (id === 'manual') {
+    version = sha;
     progress.log('Manual deployment triggered.');
   } else {
+    version = branch;
     progress.log(`Webhook received: ${id}.`);
   }
 
   progress.log('Loading GitLab tree...');
-  return getChanges(project_id, branch, sha)
+  return getChanges(project_id, version)
     .then(context => {
       progress.log(`Assets: ${JSON.stringify({ id, user, ...context }, null, 2)}`);
       progress.log(`Getting access token for ${config('AUTH0_CLIENT_ID')}/${config('AUTH0_DOMAIN')}`);
