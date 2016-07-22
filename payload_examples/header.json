@@ -1,0 +1,10 @@
+{
+  "x-forwarded-for": "40.84.62.244",
+  "x-forwarded-proto": "https",
+  "content-length": "1759",
+  "host": "9e0beaf8.ngrok.io",
+  "connection": "close",
+  "x-gitlab-token": "secret-ext",
+  "x-gitlab-event": "Push Hook",
+  "content-type": "application/json"
+}

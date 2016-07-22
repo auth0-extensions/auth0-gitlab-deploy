@@ -1,0 +1,35 @@
+# Auth0 Source Control Integration with GitLab
+
+The `Gitlab Deploy` extension allows you to deploy rules and database connections from GitLab to Auth0 (currently only for the public cloud as extensions are not yet supported in the appliance).
+
+ - Repositories: public and private repos (using GitLab Personal Access Tokens)
+ - Rules: Supports the actual code + status (enable/disabled), stage and order
+ - Database Connections: all scripts
+
+Everything is convention based and a sample repository is available here: [https://github.com/auth0-samples/github-source-control-integration](https://github.com/auth0-samples/github-source-control-integration)
+
+Features:
+
+**Configuration Help**
+
+The first page will explain how you can create a webhook in your GitLab repository pointing to the extension.
+
+![](https://cdn.auth0.com/docs/media/articles/extensions/github-deploy/extension-config.png)
+
+After setting up the Webhook you can start commiting to your repository. For each commit, if changes were made in the `rules` and `database-connection` folders the webhook will call the extension to start the deployment.
+
+Note that we always do a full redeploy of all contents to make sure we keep a consistent state. 
+
+> This means that any rules or db connection scripts that existing in Auth0 but don't existing in your repository will be deleted, because your GitLab repo becomes the single source of truth
+
+You can track all of your deployments in the extension itself:
+
+![](https://cdn.auth0.com/docs/media/articles/extensions/github-deploy/deployments-overview.png)
+
+If a deployment fails you can also look at the details of the deployment and figure out why it failed:
+
+![](https://cdn.auth0.com/docs/media/articles/extensions/github-deploy/deployment-log.png)
+
+Finally, if you configured a Slack Incoming Webhook you'll be notified on Slack if a deployment succeeded or failed:
+
+![](https://cdn.auth0.com/docs/media/articles/extensions/github-deploy/slack-messages.png)

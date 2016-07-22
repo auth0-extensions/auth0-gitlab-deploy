@@ -1,0 +1,57 @@
+{
+  "object_kind": "push",
+  "event_name": "push",
+  "before": "4e8b50f3a4ce9012fcd745b4261892a5fc9df919",
+  "after": "3075791bb967a5484cc36a857058a6601dd46bd6",
+  "ref": "refs/heads/master",
+  "checkout_sha": "3075791bb967a5484cc36a857058a6601dd46bd6",
+  "message": null,
+  "user_id": 625472,
+  "user_name": "Alexander",
+  "user_email": "nonexist.void@gmail.com",
+  "user_avatar": "https://secure.gravatar.com/avatar/991580f2065c3600cec985512570ef9a?s=80&d=identicon",
+  "project_id": 1423539,
+  "project": {
+    "name": "auth0-rules",
+    "description": "Repo for testing auth0-github-deploy",
+    "web_url": "https://gitlab.com/zxan1285/auth0-rules",
+    "avatar_url": null,
+    "git_ssh_url": "git@gitlab.com:zxan1285/auth0-rules.git",
+    "git_http_url": "https://gitlab.com/zxan1285/auth0-rules.git",
+    "namespace": "zxan1285",
+    "visibility_level": 20,
+    "path_with_namespace": "zxan1285/auth0-rules",
+    "default_branch": "master",
+    "homepage": "https://gitlab.com/zxan1285/auth0-rules",
+    "url": "git@gitlab.com:zxan1285/auth0-rules.git",
+    "ssh_url": "git@gitlab.com:zxan1285/auth0-rules.git",
+    "http_url": "https://gitlab.com/zxan1285/auth0-rules.git"
+  },
+  "commits": [
+    {
+      "id": "3075791bb967a5484cc36a857058a6601dd46bd6",
+      "message": "test\n",
+      "timestamp": "2016-07-22T17:14:32+03:00",
+      "url": "https://gitlab.com/zxan1285/auth0-rules/commit/3075791bb967a5484cc36a857058a6601dd46bd6",
+      "author": {
+        "name": "Oleksandr Zarubin",
+        "email": "oleksandr.zarubin@ua.akvelon.com"
+      },
+      "added": [],
+      "modified": [
+        "rules/some-rule.js"
+      ],
+      "removed": []
+    }
+  ],
+  "total_commits_count": 1,
+  "repository": {
+    "name": "auth0-rules",
+    "url": "git@gitlab.com:zxan1285/auth0-rules.git",
+    "description": "Repo for testing auth0-github-deploy",
+    "homepage": "https://gitlab.com/zxan1285/auth0-rules",
+    "git_http_url": "https://gitlab.com/zxan1285/auth0-rules.git",
+    "git_ssh_url": "git@gitlab.com:zxan1285/auth0-rules.git",
+    "visibility_level": 20
+  }
+}
