@@ -27,11 +27,6 @@ module.exports = (secret) => (req, res, next) => {
   if (secret !== req.headers['x-gitlab-token']) {
     return next(new UnauthorizedError('The GitLab webhook secret is incorrect.'));
   }
-  console.log(`------HEAD--------`);
-  console.log(JSON.stringify(req.headers));
-  console.log(`------BODY--------`);
-  console.log(JSON.stringify(req.body));
-  console.log(`--------------------`);
 
   req.webhook = parse(req.headers, req.body);
   return next();
