@@ -1,6 +1,6 @@
-# Auth0 Bitbucket Deployments
+# Auth0 GitLab Deployments
 
-This extension makes it possible to deploy Rules and Database Connection scripts from Bitbucket to Auth0.
+This extension makes it possible to deploy Rules and Database Connection scripts from GitLab to Auth0.
 
 ## Running
 

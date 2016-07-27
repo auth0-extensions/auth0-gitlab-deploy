@@ -108,10 +108,8 @@ const getRulesTree = (projectId, branch) =>
 			gitlab.projects.repository.listTree(projectId, {
 				ref_name: branch,
 				path: constants.RULES_DIRECTORY
-			}, (res, err) => {
-				if (err) {
-					return reject(err);
-				} else if (!res) {
+			}, (res) => {
+				if (!res) {
 					return resolve([]);
 				}
 
@@ -139,10 +137,8 @@ const getConnectionTreeByPath = (projectId, branch, path) =>
 			gitlab.projects.repository.listTree(projectId, {
 				ref_name: branch,
 				path: `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${path}`
-			}, (res, err) => {
-				if (err) {
-					return reject(err);
-				} else if (!res) {
+			}, (res) => {
+				if (!res) {
 					return resolve([]);
 				}
 
@@ -170,10 +166,8 @@ const getConnectionsTree = (projectId, branch) =>
 			gitlab.projects.repository.listTree(projectId, {
 				ref_name: branch,
 				path: constants.DATABASE_CONNECTIONS_DIRECTORY
-			}, (res, err) => {
-				if (err) {
-					return reject(err);
-				} else if (!res) {
+			}, (res) => {
+				if (!res) {
 					return resolve([]);
 				}
 
