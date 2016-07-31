@@ -1,7 +1,7 @@
 {
   "title": "Gitlab Deployments",
   "name": "auth0-gitlab-deploy",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": "auth0",
   "description": "This extension gives Auth0 customers the possibility to deploy Rules and Custom Database Connections from GitLab.",
   "type": "application",
@@ -11,7 +11,8 @@
   "repository": "https://github.com/auth0-extensions/auth0-gitlab-deploy",
   "keywords": [
     "auth0",
-    "extension"
+    "extension",
+    "gitlab"
   ],
   "auth0": {
     "createClient": true,

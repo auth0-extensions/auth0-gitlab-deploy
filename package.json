@@ -1,6 +1,6 @@
 {
   "name": "auth0-gitlab-deploy-extension",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Auth0 GitLab Deployment Extension",
   "engines": {
     "node": "5.9.0"
@@ -15,10 +15,10 @@
     "test:watch": "cross-env NODE_ENV=test mocha -R spec --compilers js:babel-core/register --recursive --timeout 5000 $(find ./tests -name *.tests.js) --watch tests/runner.js",
     "extension:build": "cross-env NODE_ENV=production webpack -p --config ./build/extension/webpack.config.js",
     "extension:bundle": "cp ./dist/auth0-gitlab-deploy.extension.$npm_package_version.js ./build/bundle.js",
-    "win-extension:bundle": "copy dist\\auth0-gitlab-deploy.extension.%npm_package_version%.js build\\bundle.js /y",
+    "extension:bundle-win": "copy dist\\auth0-gitlab-deploy.extension.%npm_package_version%.js build\\bundle.js /y",
     "extension:size": "cross-env NODE_ENV=production webpack -p --config ./build/extension/webpack.config.js --json > ./build/extension/bundle-size.json && node ./build/extension/bundle-size.js",
     "build": "npm run clean && npm run client:build && npm run extension:build && npm run extension:bundle",
-    "win-build": "cross-env NODE_ENV=production && npm run clean && npm run client:build && npm run extension:build && npm run win-extension:bundle",
+    "build-win": "cross-env NODE_ENV=production && npm run clean && npm run client:build && npm run extension:build && npm run win-extension:bundle",
     "tag": "git tag $npm_package_version && git push --tags"
   },
   "keywords": [
