@@ -10,7 +10,6 @@ import * as constants from './constants';
 /*
  * GitLab API connection
  */
-
 const gitlab = new GitLabApi({
 	url: 'https://gitlab.com',
 	token: config('GITLAB_TOKEN')
@@ -209,7 +208,7 @@ const getTree = (projectId, branch) => {
 const downloadFile = (projectId, branch, file) =>
 	new Promise((resolve, reject) => {
 		try {
-			gitlab.projects.repository.showFile(projectId, {ref: branch, file_path: file.path}, (data, err) => {
+			gitlab.projects.repository.showFile(projectId, { ref: branch, file_path: file.path }, (data, err) => {
 				if (data) {
 					return resolve({
 						fileName: file.path,
@@ -277,7 +276,7 @@ const getRules = (projectId, branch, files) => {
 	});
 
 	// Download all rules.
-	return Promise.map(Object.keys(rules), (ruleName) => downloadRule(projectId, branch, ruleName, rules[ruleName]), {concurrency: 2});
+	return Promise.map(Object.keys(rules), (ruleName) => downloadRule(projectId, branch, ruleName, rules[ruleName]), { concurrency: 2 });
 };
 
 /*
@@ -324,7 +323,7 @@ const getDatabaseScripts = (projectId, branch, files) => {
 		}
 	});
 
-	return Promise.map(Object.keys(databases), (databaseName) => downloadDatabaseScript(projectId, branch, databaseName, databases[databaseName]), {concurrency: 2});
+	return Promise.map(Object.keys(databases), (databaseName) => downloadDatabaseScript(projectId, branch, databaseName, databases[databaseName]), { concurrency: 2 });
 };
 
 /*
@@ -358,7 +357,6 @@ export const getProjectId = (path) =>
 					return reject(new Error('Unable to determine project ID'));
 
 				const currentProject = projects.filter(f => f.path_with_namespace === path);
-
 				if (currentProject[0] && currentProject[0].id)
 					return resolve(currentProject[0].id);
 				else

@@ -3,7 +3,6 @@ import Promise from 'bluebird';
 import * as constants from '../constants';
 import {ValidationError} from '../errors'
 
-
 /*
  * Get all rules in all stages.
  */
@@ -110,13 +109,20 @@ const validateRulesExistence = (progress, client, rules, existingRules) => new P
 
 const validateRulesStages = (progress, client, rules, existingRules) => new Promise((resolve, reject) => {
   // Rules with invalid state
-  const invalidStages = _.filter(rules, (rule) => rule.metadata && rule.metadata.stage && constants.RULES_STAGES.indexOf(rule.metadata.stage)!=0).map(rule=> rule.name);
-  if (invalidStages.length > 0) return reject(new ValidationError(`The following rules have invalid stages set in their metadata files: ${invalidStages}. Go to https://auth0.com/docs/api/management/v2#!/Rules/post_rules to find the valid stage names.`));
+  const invalidStages = _.filter(rules, (rule) => rule.metadata && rule.metadata.stage && constants.RULES_STAGES.indexOf(rule.metadata.stage)!=0)
+    .map(rule=> rule.name);
+  if (invalidStages.length > 0) {
+    return reject(new ValidationError(`The following rules have invalid stages set in their metadata files: ${invalidStages}.`
+      + ' Go to https://auth0.com/docs/api/management/v2#!/Rules/post_rules to find the valid stage names.'));
+  }
 
   // Rules that changed state
-  const changeStages = _.filter(rules, (rule) => rule.metadata && rule.metadata.stage && _.some(existingRules, (existing) => existing.name === rule.name && existing.stage !== rule.metadata.stage)).map(rule => rule.name);
-  if (changeStages.length > 0) return reject(new ValidationError(`The following rules changed stage which is not allowed: ${changeStages}. Rename the rules to recreate them and avoid this error.`));
-    
+  const changeStages = _.filter(rules, (rule) => rule.metadata && rule.metadata.stage && _.some(existingRules, (existing) => existing.name === rule.name && existing.stage !== rule.metadata.stage))
+    .map(rule => rule.name);
+  if (changeStages.length > 0) {
+    return reject(new ValidationError(`The following rules changed stage which is not allowed: ${changeStages}. Rename the rules to recreate them and avoid this error.`));
+  }
+
   resolve(existingRules);
 });
 
@@ -131,8 +137,11 @@ const validateRulesOrder = (progress, client, rules, existingRules) => new Promi
     .omit(count => count < 2)
     .keys()
     .value();
-    
-  if (duplicatedStageOrder.length > 0) return reject(new ValidationError(`There are multiple rules for the following stage-order combinations [${duplicatedStageOrder}]. Only one rule must be defined for the same order number in a stage.`));
+
+  if (duplicatedStageOrder.length > 0) {
+    return reject(new ValidationError(`There are multiple rules for the following stage-order combinations [${duplicatedStageOrder}].`
+      + ' Only one rule must be defined for the same order number in a stage.'));
+  }
 
   // Rules with same order than existing rules
   const rulesRepeatingOrder = rulesWithOrder
@@ -140,7 +149,10 @@ const validateRulesOrder = (progress, client, rules, existingRules) => new Promi
     .map(rule => rule.name)
     .value();
 
-  if (rulesRepeatingOrder.length > 0) return reject(new ValidationError(`The following rules have the same order number that other existing rule: ${rulesRepeatingOrder}. Updating them may cause a failure in deployment, use different order numbers to ensure a succesful deployment`));
+  if (rulesRepeatingOrder.length > 0) {
+    return reject(new ValidationError(`The following rules have the same order number that other existing rule: ${rulesRepeatingOrder}.`
+      ' Updating them may cause a failure in deployment, use different order numbers to ensure a succesful deployment'));
+  }
 
   resolve(existingRules);
 });
