@@ -9,5 +9,5 @@ export default {
   /* rules operations */
   validateRules : rules.validateRules,
   deleteRules : rules.deleteRules,
-  updateRules : rules.updateRules,g
+  updateRules : rules.updateRules
 }
