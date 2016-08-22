@@ -3,6 +3,7 @@ import { Router as router } from 'express';
 import { middlewares } from 'auth0-extension-express-tools';
 import html from './html';
 import meta from './meta';
+import rules from './rules';
 import hooks from './hooks';
 import webhooks from './webhooks';
 
@@ -37,6 +38,7 @@ export default () => {
   routes.get('/', html());
   routes.use('/meta', meta());
   routes.use('/webhooks', webhooks());
+  routes.use('/api/rules', requireUser, rules());
 
   routes.get('/api/config', requireUser, (req, res) => {
     res.json({
