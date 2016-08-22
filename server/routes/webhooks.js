@@ -6,7 +6,7 @@ import deploy from '../lib/deploy';
 import { hasChanges } from '../lib/gitlab';
 import { gitlabWebhook } from '../lib/middlewares';
 
-export default (storageContext) => {
+export default () => {
   const activeBranch = config('GITLAB_BRANCH');
   const gitlabSecret = config('EXTENSION_SECRET');
 
@@ -30,7 +30,7 @@ export default (storageContext) => {
     }
 
     // Deploy the changes.
-    return deploy(storageContext, id, project_id, branch, repository, sha, user)
+    return deploy(req.storage, id, project_id, branch, repository, sha, user, req.auth0)
       .then(stats => res.status(200).json(stats))
       .catch(next);
   });

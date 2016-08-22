@@ -32,7 +32,7 @@ const trackProgress = (id, branch, repository, sha, user) => {
 };
 
 
-export default (storageContext, id, project_id, branch, repository, sha, user) => {
+export default (storage, id, project_id, branch, repository, sha, user, client) => {
   const progress = trackProgress(id, branch, repository, sha, user);
   let version;
 
@@ -50,19 +50,21 @@ export default (storageContext, id, project_id, branch, repository, sha, user) =
       progress.log(`Assets: ${JSON.stringify({ id, user, ...context }, null, 2)}`);
       progress.log(`Getting access token for ${config('AUTH0_CLIENT_ID')}/${config('AUTH0_DOMAIN')}`);
 
+      context.client = client;
+
       // Send all changes to Auth0.
-      return getForClient(config('AUTH0_DOMAIN'), config('AUTH0_CLIENT_ID'), config('AUTH0_CLIENT_SECRET'))
-        .then((client) => {
-          context.client = client;
+      storage.read()
+        .then((data) => {
+          context.excluded_rules = data.excluded_rules || [];
         })
         .then(() => auth0.validateDatabases(progress,context.client, context.databases))
-        .then(() => auth0.validateRules(progress,context.client, context.rules))
+        .then(() => auth0.validateRules(progress,context.client, context.rules, context.excluded_rules))
         .then(() => auth0.updateDatabases(progress, context.client, context.databases))
-        .then(() => auth0.deleteRules(progress, context.client, context.rules))
+        .then(() => auth0.deleteRules(progress, context.client, context.rules, context.excluded_rules))
         .then(() => auth0.updateRules(progress, context.client, context.rules))
         .then(() => progress.log('Done.'));
     })
-    .then(() => appendProgress(storageContext, progress))
+    .then(() => appendProgress(storage, progress))
     .then(() => pushToSlack(progress, `${config('WT_URL')}/login`))
     .then(() => ({
       connections: {
@@ -79,7 +81,7 @@ export default (storageContext, id, project_id, branch, repository, sha, user) =
       progress.error = err;
       progress.log(`Error: ${err.message}`);
       progress.log(`StackTrace: ${err.stack}`);
-      appendProgress(storageContext, progress);
+      appendProgress(storage, progress);
 
       // Final attempt to push to slack.
       pushToSlack(progress, `${config('WT_URL')}/login`);

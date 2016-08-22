@@ -2,7 +2,7 @@ import * as rules from './rules'
 import * as connections from './connections'
 
 export default {
-  /* Connection and database operations */
+  /* COnnection and database operations */
   validateDatabases : connections.validateDatabases,
   updateDatabases : connections.updateDatabases,
 
