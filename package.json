@@ -93,6 +93,7 @@
     "react-dom": "^15.1.0",
     "react-loader-advanced": "^1.4.0",
     "react-redux": "^4.4.5",
+    "react-s-alert": "^1.1.4",
     "react-transform-hmr": "^1.0.4",
     "redux": "^3.5.2",
     "redux-devtools": "^3.3.1",
