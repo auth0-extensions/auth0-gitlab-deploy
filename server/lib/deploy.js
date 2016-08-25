@@ -5,7 +5,6 @@ import auth0 from './auth0';
 import { pushToSlack } from './slack';
 import { getChanges } from './gitlab';
 import { appendProgress } from './storage';
-import { getForClient } from './managementApiClient';
 
 const trackProgress = (id, branch, repository, sha, user) => {
   const logs = [];

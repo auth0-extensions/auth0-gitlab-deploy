@@ -10,10 +10,18 @@ import * as constants from './constants';
 /*
  * GitLab API connection
  */
-const gitlab = new GitLabApi({
-	url: 'https://gitlab.com',
-	token: config('GITLAB_TOKEN')
-});
+let gitlab = null;
+
+const getApi = () => {
+	if (!gitlab) {
+		gitlab = new GitLabApi({
+			url: 'https://gitlab.com',
+			token: config('GITLAB_TOKEN')
+		});
+	}
+
+	return gitlab;
+};
 
 /*
  * Check if a file is part of the rules folder.
@@ -104,7 +112,7 @@ const parseRepo = (repository = '') => {
 const getRulesTree = (projectId, branch) =>
 	new Promise((resolve, reject) => {
 		try {
-			gitlab.projects.repository.listTree(projectId, {
+			getApi().projects.repository.listTree(projectId, {
 				ref_name: branch,
 				path: constants.RULES_DIRECTORY
 			}, (res) => {
@@ -133,7 +141,7 @@ const getRulesTree = (projectId, branch) =>
 const getConnectionTreeByPath = (projectId, branch, path) =>
 	new Promise((resolve, reject) => {
 		try {
-			gitlab.projects.repository.listTree(projectId, {
+			getApi().projects.repository.listTree(projectId, {
 				ref_name: branch,
 				path: `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${path}`
 			}, (res) => {
@@ -162,7 +170,7 @@ const getConnectionTreeByPath = (projectId, branch, path) =>
 const getConnectionsTree = (projectId, branch) =>
 	new Promise((resolve, reject) => {
 		try {
-			gitlab.projects.repository.listTree(projectId, {
+			getApi().projects.repository.listTree(projectId, {
 				ref_name: branch,
 				path: constants.DATABASE_CONNECTIONS_DIRECTORY
 			}, (res) => {
@@ -208,7 +216,7 @@ const getTree = (projectId, branch) => {
 const downloadFile = (projectId, branch, file) =>
 	new Promise((resolve, reject) => {
 		try {
-			gitlab.projects.repository.showFile(projectId, { ref: branch, file_path: file.path }, (data, err) => {
+			getApi().projects.repository.showFile(projectId, { ref: branch, file_path: file.path }, (data, err) => {
 				if (data) {
 					return resolve({
 						fileName: file.path,
@@ -352,7 +360,7 @@ export const getChanges = (projectId, branch) =>
 export const getProjectId = (path) =>
 	new Promise((resolve, reject) => {
 		try {
-			gitlab.projects.all(projects => {
+			getApi().projects.all(projects => {
 				if (!projects)
 					return reject(new Error('Unable to determine project ID'));
 
