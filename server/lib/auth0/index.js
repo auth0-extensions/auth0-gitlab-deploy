@@ -1,5 +1,6 @@
 import * as rules from './rules'
 import * as connections from './connections'
+import * as pages from './pages'
 
 export default {
   /* COnnection and database operations */
@@ -9,5 +10,9 @@ export default {
   /* rules operations */
   validateRules : rules.validateRules,
   deleteRules : rules.deleteRules,
-  updateRules : rules.updateRules
+  updateRules : rules.updateRules,
+
+  /* pages operations */
+  updatePasswordResetPage : pages.updatePasswordResetPage,
+  updateLoginPage : pages.updateLoginPage
 }
