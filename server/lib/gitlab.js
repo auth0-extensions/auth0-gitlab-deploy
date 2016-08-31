@@ -420,7 +420,6 @@ const getPages = (projectId, branch, files) => {
 	pages[index] = pages[pageName] || {};
 	pages[index].file = file;
 	pages[index].contents = null;
-	pages[index].sha = file.sha;
 	pages[index].path = file.path;
 	if(ext!='json')
 		pages[index].meta = path.parse(file.path).name+'.json';
