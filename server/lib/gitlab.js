@@ -36,6 +36,12 @@ const isDatabaseConnection = (fileName) =>
 fileName.indexOf(`${constants.DATABASE_CONNECTIONS_DIRECTORY}/`) === 0;
 
 /*
+ * Check if a file is part of the page folder.
+ */
+const isPage = (file) =>
+file.indexOf(`${constants.PAGES_DIRECTORY}/`) === 0 && constants.PAGE_NAMES.indexOf(file.split('/').pop()) >= 0;
+
+/*
  * Get the details of a database file script.
  */
 const getDatabaseScriptDetails = (filename) => {
@@ -63,18 +69,24 @@ const validRulesOnly = (fileName) => /\.(js|json)$/i.test(fileName);
  */
 const validConnectionsOnly = (fileName) => /\.(js)$/i.test(fileName);
 
+/*
+ * Only valid pages files
+ */
+const validPagesOnly = (fileName) =>
+constants.PAGE_NAMES.indexOf(fileName) >= 0;
 
 /*
  * Only Javascript and JSON files.
  */
 const validFilesOnly = (fileName) => {
-  if (isRule(fileName)) {
+  if (isPage(fileName)) {
+    return true;
+  } else if (isRule(fileName)) {
     return /\.(js|json)$/i.test(fileName);
   } else if (isDatabaseConnection(fileName)) {
     const script = getDatabaseScriptDetails(fileName);
     return !!script;
   }
-
   return false;
 };
 
@@ -89,6 +101,32 @@ _.chain(commits)
   .filter(validFilesOnly)
   .value()
   .length > 0;
+
+/*
+ * Get rules tree.
+ */
+const getPagesTree = (projectId, branch) =>
+  new Promise((resolve, reject) => {
+    try {
+      getApi().projects.repository.listTree(projectId, {
+        ref_name: branch,
+        path: constants.PAGES_DIRECTORY
+      }, (res) => {
+        if (!res) {
+          return resolve([]);
+        }
+        const files = res
+          .filter(f => f.type === 'blob')
+          .filter(f => validPagesOnly(f.name));
+        files.forEach((elem, idx) => {
+          files[idx].path = `${constants.PAGES_DIRECTORY}/${elem.name}`;
+        });
+        return resolve(files);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
 
 /*
  * Get rules tree.
@@ -109,7 +147,7 @@ const getRulesTree = (projectId, branch) =>
           .filter(f => validRulesOnly(f.name));
 
         files.forEach((elem, idx) => {
-          files[idx].path = `${constants.RULES_DIRECTORY}/${elem.name}`
+          files[idx].path = `${constants.RULES_DIRECTORY}/${elem.name}`;
         });
 
         return resolve(files);
@@ -187,11 +225,12 @@ const getTree = (projectId, branch) => {
   // Getting separate trees for rules and connections, as GitLab does not provide full (recursive) tree
   const promises = {
     rules: getRulesTree(projectId, branch),
-    connections: getConnectionsTree(projectId, branch)
+    connections: getConnectionsTree(projectId, branch),
+    pages: getPagesTree(projectId, branch)
   };
 
   return Promise.props(promises)
-    .then((result) => (_.union(result.rules, result.connections)));
+    .then((result) => (_.union(result.rules, result.connections, result.pages)));
 };
 
 /*
@@ -319,6 +358,49 @@ const getDatabaseScripts = (projectId, branch, files) => {
 };
 
 /*
+ * Download a single page script.
+ */
+const downloadPage = (projectId, branch, pageName, page) => {
+  const currentPage = {
+    ...page,
+    name: pageName
+  };
+  const downloads = [];
+  if (page.file) {
+    downloads.push(downloadFile(projectId, branch, page.file)
+      .then(file => {
+        currentPage.contents = file.contents;
+      }));
+  }
+
+  return Promise.all(downloads)
+    .then(() => currentPage);
+};
+
+/*
+ * Get all pages.
+ */
+const getPages = (projectId, branch, files) => {
+  const pages = {};
+  // Determine if we have the script, the metadata or both.
+  _.filter(files, f => isPage(f.path)).forEach(file => {
+    const pageName = path.parse(file.path).name;
+    const ext = path.parse(file.path).ext;
+    const index = pageName + ext;
+    pages[index] = pages[pageName] || {};
+    pages[index].file = file;
+    pages[index].contents = null;
+    pages[index].path = file.path;
+
+    if (ext !== 'json') {
+      pages[index].meta = `${path.parse(file.path).name}.json`;
+    }
+  });
+
+  return Promise.map(Object.keys(pages), (pageName) => downloadPage(projectId, branch, pageName, pages[pageName]), { concurrency: 2 });
+};
+
+/*
  * Get a list of all changes that need to be applied to rules and database scripts.
  */
 export const getChanges = (projectId, branch) =>
@@ -328,13 +410,15 @@ export const getChanges = (projectId, branch) =>
 
       const promises = {
         rules: getRules(projectId, branch, files),
-        databases: getDatabaseScripts(projectId, branch, files)
+        databases: getDatabaseScripts(projectId, branch, files),
+        pages: getPages(projectId, branch, files)
       };
 
       return Promise.props(promises)
         .then((result) => ({
           rules: result.rules,
-          databases: result.databases
+          databases: result.databases,
+          pages: result.pages
         }));
     });
 

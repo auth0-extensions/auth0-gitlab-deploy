@@ -14,8 +14,7 @@ export default () => {
               _.forEach(rules, (rule) => {
                 result[rule.name] = (data.excluded_rules.indexOf(rule.name) >= 0);
               });
-            }
-            else {
+            } else {
               _.forEach(rules, (rule) => {
                 result[rule.name] = false;
               });

@@ -56,6 +56,8 @@ export default (storage, id, projectId, branch, repository, sha, user, client) =
         .then((data) => {
           context.excluded_rules = data.excluded_rules || [];
         })
+        .then(() => auth0.updatePasswordResetPage(progress, context.client, context.pages))
+        .then(() => auth0.updateLoginPage(progress, context.client, context.pages))
         .then(() => auth0.validateDatabases(progress,context.client, context.databases))
         .then(() => auth0.validateRules(progress,context.client, context.rules, context.excluded_rules))
         .then(() => auth0.updateDatabases(progress, context.client, context.databases))
@@ -73,7 +75,8 @@ export default (storage, id, projectId, branch, repository, sha, user, client) =
         created: progress.rulesCreated,
         updated: progress.rulesUpdated,
         deleted: progress.rulesDeleted
-      }
+      },
+      pages: {}
     }))
     .catch(err => {
       // Log error and persist.
