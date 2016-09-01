@@ -1,13 +1,13 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 const nconf = require('nconf');
 const path = require('path');
 const tools = require('auth0-extension-tools');
 
 import auth0 from '../server/lib/auth0';
 import config from '../server/lib/config';
-import {getChanges} from '../server/lib/gitlab';
+import { getChanges } from '../server/lib/gitlab';
 
-const progress = {log: () => null};
+const progress = { log: () => null };
 let client = null;
 
 describe.only('managementApiClient', () => {
@@ -43,7 +43,7 @@ describe.only('managementApiClient', () => {
         clientId: config('AUTH0_CLIENT_ID'),
         clientSecret: config('AUTH0_CLIENT_SECRET')
       })
-        .then(function (managementClient) {
+        .then(managementClient => {
           expect(managementClient).not.to.be.null;
           client = managementClient;
           done();
@@ -63,13 +63,13 @@ describe.only('managementApiClient', () => {
 
   describe('#validateIncorrectDatabases', () => {
     it('should validate incorrect databases', (done) => {
-      const data = [{
-        name: 'deploy-test-database-' + new Date().getTime(),
-        scripts: [{
-          stage: "login",
-          contents: "function login (email, password, callback) {\nreturn callback(new Error('Not Implemented'));\n}"
-        }]
-      }];
+      const data = [ {
+        name: `deploy-test-database-${new Date().getTime()}`,
+        scripts: [ {
+          stage: 'login',
+          contents: 'function login (email, password, callback) {\nreturn callback(new Error(\'Not Implemented\'));\n}'
+        } ]
+      } ];
 
       auth0.validateDatabases(progress, client, data)
         .catch((err) => {
@@ -93,12 +93,12 @@ describe.only('managementApiClient', () => {
     it('should validate incorrect rules', (done) => {
       const data = [
         {
-          metadata: {enabled: false, order: 10},
+          metadata: { enabled: false, order: 10 },
           name: 'manual-rule-one'
         },
         {
           script: 'function (user, context, callback) {\ncallback(null, user, context);\n}',
-          metadata: {order: 15},
+          metadata: { order: 15 },
           name: 'rule1'
         }];
 
@@ -112,11 +112,11 @@ describe.only('managementApiClient', () => {
 
   describe('#validateCorrectRules', () => {
     it('should validate correct rules', (done) => {
-      const data = [{
+      const data = [ {
         script: 'function (user, context, callback) {\ncallback(null, user, context);\n}',
-        metadata: {order: 15},
+        metadata: { order: 15 },
         name: 'rule1'
-      }];
+      } ];
 
       auth0.validateRules(progress, client, data, []).then(() => {
         done();
@@ -126,11 +126,11 @@ describe.only('managementApiClient', () => {
 
   describe('#updateRules', () => {
     it('should update rules', (done) => {
-      const data = [{
+      const data = [ {
         script: 'function (user, context, callback) {\ncallback(null, user, context);\n}',
-        metadata: {order: 15},
+        metadata: { order: 15 },
         name: 'rule1'
-      }];
+      } ];
 
       auth0.updateRules(progress, client, data).then(() => {
         done();
@@ -141,6 +141,47 @@ describe.only('managementApiClient', () => {
   describe('#deleteRules', () => {
     it('should delete all rules', (done) => {
       auth0.deleteRules(progress, client, [], []).then(() => {
+        done();
+      });
+    });
+  });
+
+  describe('#updateLoginPage', () => {
+    it('should update custom login page', (done) => {
+      const data = [
+        {
+          contents: '<html>\n<head></head>\n\n<body> \n<h1> Login Page </h1>\n</body>\n</html>',
+          meta: 'login.json',
+          name: 'login.html'
+        },
+        {
+          contents: '{\n\t"enabled": false\n}',
+          meta: 'login.json',
+          name: 'login.json'
+        }];
+
+      auth0.updateLoginPage(progress, client, data).then(() => {
+        done();
+      });
+    });
+  });
+
+  describe('#updatePasswordPage', () => {
+    it('should update custom password page', (done) => {
+      const data = [
+        {
+          contents: '<html>\n<head></head>\n\n<body> \n<h1> Reset Password Page </h1>\n</body>\n</html>',
+          meta: 'password_reset.json',
+          name: 'password_reset.html'
+        },
+        {
+          contents: '{\n\t"enabled": false\n}',
+          meta: 'password_reset.json',
+          name: 'password_reset.json'
+        }
+      ];
+
+      auth0.updatePasswordResetPage(progress, client, data).then(() => {
         done();
       });
     });

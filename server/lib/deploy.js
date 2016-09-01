@@ -31,7 +31,7 @@ const trackProgress = (id, branch, repository, sha, user) => {
 };
 
 
-export default (storage, id, project_id, branch, repository, sha, user, client) => {
+export default (storage, id, projectId, branch, repository, sha, user, client) => {
   const progress = trackProgress(id, branch, repository, sha, user);
   let version;
 
@@ -44,7 +44,7 @@ export default (storage, id, project_id, branch, repository, sha, user, client) 
   }
 
   progress.log('Loading GitLab tree...');
-  return getChanges(project_id, version)
+  return getChanges(projectId, version)
     .then(context => {
       progress.log(`Assets: ${JSON.stringify({ id, user, ...context }, null, 2)}`);
       progress.log(`Getting access token for ${config('AUTH0_CLIENT_ID')}/${config('AUTH0_DOMAIN')}`);
