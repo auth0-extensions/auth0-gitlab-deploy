@@ -10,13 +10,11 @@ export default () => {
         req.storage.read()
           .then(data => {
             const result = {};
-
             if (data && data.excluded_rules) {
               _.forEach(rules, (rule) => {
                 result[rule.name] = (data.excluded_rules.indexOf(rule.name) >= 0);
               });
-            }
-            else {
+            } else {
               _.forEach(rules, (rule) => {
                 result[rule.name] = false;
               });
@@ -30,16 +28,16 @@ export default () => {
   });
 
   api.post('/', (req, res, next) => {
-    const excluded_rules = req.body.names || [];
+    const excludedRules = req.body.names || [];
 
     req.storage.read()
       .then(data => {
-        data.excluded_rules = excluded_rules;
+        data.excluded_rules = excludedRules;
         return data;
       })
       .then(data => req.storage.write(data))
-      .then(() => res.status(200).send())
-      .catch(next)
+      .then(() => res.status(201).send())
+      .catch(next);
   });
 
   return api;

@@ -1,17 +1,17 @@
 import { ArgumentError, UnauthorizedError } from '../errors';
 
-const parse = (headers, { ref = '', commits = [], project = {}, project_id = '', user_email = '', event_name = '', checkout_sha = ''}) => {
+const parse = (headers, { ref = '', commits = [], project = {}, projectId = '', userEmail = '', eventName = '', checkoutSha = ''}) => {
   const refParts = ref.split('/');
 
   return {
-    id: checkout_sha,
-    project_id,
-    event: event_name,
+    id: checkoutSha,
+    project_id: projectId,
+    event: eventName,
     branch: refParts.length === 3 ? refParts[2] : '',
     commits,
     repository: project.path_with_namespace,
-    user: user_email,
-    sha: checkout_sha
+    user: userEmail,
+    sha: checkoutSha
   };
 };
 

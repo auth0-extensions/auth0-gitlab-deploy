@@ -14,20 +14,15 @@ export default () => {
   webhooks.post('/deploy', gitlabWebhook(gitlabSecret), (req, res, next) => {
     const { id, project_id, branch, commits, repository, user, sha } = req.webhook;
 
-    // Only accept push requests.
-    // if (req.webhook.event !== 'push') {
-    //   return res.status(202).json({ message: `Request ignored, the '${req.webhook.event}' event is not supported.` });
-    // }
-
     // Only for the active branch.
-    // if (branch !== activeBranch) {
-    //   return res.status(202).json({ message: `Request ignored, '${branch}' is not the active branch.` });
-    // }
-    //
-    // // Only run if there really are changes.
-    // if (!hasChanges(commits)) {
-    //   return res.status(202).json({ message: 'Request ignored, none of the Rules or Database Connection scripts were changed.' });
-    // }
+    if (branch !== activeBranch) {
+      return res.status(202).json({ message: `Request ignored, '${branch}' is not the active branch.` });
+    }
+
+    // Only run if there really are changes.
+    if (!hasChanges(commits)) {
+      return res.status(202).json({ message: 'Request ignored, none of the Rules or Database Connection scripts were changed.' });
+    }
 
     // Deploy the changes.
     return deploy(req.storage, id, project_id, branch, repository, sha, user, req.auth0)

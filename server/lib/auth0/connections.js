@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import * as constants from '../constants';
-import {ValidationError} from '../errors'
+import { ValidationError } from '../errors';
 
 
 /*
@@ -15,7 +15,7 @@ const getDatabaseConnections = (progress, client, databases) => {
     .then(connections => {
       progress.connections = connections.filter(c => databaseNames.indexOf(c.name) > -1);
       return progress.connections;
-  });
+    });
 };
 
 /*
@@ -29,8 +29,8 @@ const updateDatabase = (progress, client, connections, database) => {
     throw new Error(`Unable to find connection named: '${database.name}'`);
   }
 
-  const options = connection.options || { };
-  options.customScripts = { };
+  const options = connection.options || {};
+  options.customScripts = {};
 
   // Reset all scripts.
   constants.DATABASE_SCRIPTS.forEach(script => {
@@ -63,12 +63,11 @@ export const updateDatabases = (progress, client, databases) => {
     );
 };
 
-
-/* 
- * Validates that all databases included in the repo exist in the tenant
- */
+/*
+* Validates that all databases included in the repo exist in the tenant
+*/
 export const validateDatabases = (progress, client, databases) => {
- if (databases.length === 0) {
+  if (databases.length === 0) {
     return Promise.resolve(true);
   }
 
