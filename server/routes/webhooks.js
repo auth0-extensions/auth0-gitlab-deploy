@@ -6,18 +6,13 @@ import deploy from '../lib/deploy';
 import { hasChanges } from '../lib/gitlab';
 import { gitlabWebhook } from '../lib/middlewares';
 
-export default (storageContext) => {
+export default (storage) => {
   const activeBranch = config('GITLAB_BRANCH');
   const gitlabSecret = config('EXTENSION_SECRET');
 
-  const webhooks = express.Router();
+  const webhooks = express.Router(); // eslint-disable-line new-cap
   webhooks.post('/deploy', gitlabWebhook(gitlabSecret), (req, res, next) => {
     const { id, project_id, branch, commits, repository, user, sha } = req.webhook;
-
-    // Only accept push requests.
-    if (req.webhook.event !== 'push') {
-      return res.status(202).json({ message: `Request ignored, the '${req.webhook.event}' event is not supported.` });
-    }
 
     // Only for the active branch.
     if (branch !== activeBranch) {
@@ -30,7 +25,7 @@ export default (storageContext) => {
     }
 
     // Deploy the changes.
-    return deploy(storageContext, id, project_id, branch, repository, sha, user)
+    return deploy(storage, id, project_id, branch, repository, sha, user, req.auth0)
       .then(stats => res.status(200).json(stats))
       .catch(next);
   });

@@ -1,8 +1,8 @@
 import fs from 'fs';
-import url from 'url';
 import ejs from 'ejs';
 import path from 'path';
 
+import { urlHelpers } from 'auth0-extension-express-tools';
 import config from '../lib/config';
 
 export default () => {
@@ -40,12 +40,9 @@ export default () => {
   return (req, res) => {
     const settings = {
       AUTH0_DOMAIN: config('AUTH0_DOMAIN'),
-      BASE_URL: url.format({
-        protocol: config('NODE_ENV') !== 'production' ? 'http' : 'https',
-        host: req.get('host'),
-        pathname: url.parse(req.originalUrl || '').pathname.replace(req.path, '')
-      }),
-      BASE_PATH: url.parse(req.originalUrl || '').pathname.replace(req.path, '') + (req.path === '/admins' ? '/admins' : '')
+      BASE_URL: urlHelpers.getBaseUrl(req),
+      BASE_PATH: urlHelpers.getBasePath(req),
+      AUTH0_MANAGE_URL: config('AUTH0_MANAGE_URL') || 'http://manage.auth0.com'
     };
 
     // Render from CDN.
