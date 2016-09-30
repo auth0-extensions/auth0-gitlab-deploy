@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import express from 'express';
 
-export default () => {
-  const api = express.Router();
+export default (storage) => {
+  const api = express.Router(); // eslint-disable-line new-cap
 
   api.get('/', (req, res, next) => {
     req.auth0.rules.get()
       .then(rules => {
-        req.storage.read()
+        storage.read()
           .then(data => {
             const result = {};
             if (data && data.excluded_rules) {
@@ -30,12 +30,12 @@ export default () => {
   api.post('/', (req, res, next) => {
     const excludedRules = req.body.names || [];
 
-    req.storage.read()
+    storage.read()
       .then(data => {
-        data.excluded_rules = excludedRules;
+        data.excluded_rules = excludedRules; // eslint-disable-line no-param-reassign
         return data;
       })
-      .then(data => req.storage.write(data))
+      .then(data => storage.write(data))
       .then(() => res.status(201).send())
       .catch(next);
   });

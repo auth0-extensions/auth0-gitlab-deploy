@@ -2,10 +2,10 @@ import _ from 'lodash';
 import path from 'path';
 import Promise from 'bluebird';
 import GitLabApi from 'gitlab';
+import { constants, unifyDatabases, unifyScripts } from 'auth0-source-control-extension-tools';
 
 import config from './config';
 import logger from '../lib/logger';
-import * as constants from './constants';
 
 /*
  * GitLab API connection
@@ -262,7 +262,8 @@ const downloadFile = (projectId, branch, file) =>
  */
 const downloadRule = (projectId, branch, ruleName, rule) => {
   const currentRule = {
-    ...rule,
+    script: false,
+    metadata: false,
     name: ruleName
   };
 
@@ -271,14 +272,16 @@ const downloadRule = (projectId, branch, ruleName, rule) => {
   if (rule.script) {
     downloads.push(downloadFile(projectId, branch, rule.scriptFile)
       .then(file => {
-        currentRule.script = file.contents;
+        currentRule.script = true;
+        currentRule.scriptFile = file.contents;
       }));
   }
 
   if (rule.metadata) {
     downloads.push(downloadFile(projectId, branch, rule.metadataFile)
       .then(file => {
-        currentRule.metadata = JSON.parse(file.contents);
+        currentRule.metadata = true;
+        currentRule.metadataFile = file.contents;
       }));
   }
 
@@ -307,7 +310,8 @@ const getRules = (projectId, branch, files) => {
   });
 
   // Download all rules.
-  return Promise.map(Object.keys(rules), (ruleName) => downloadRule(projectId, branch, ruleName, rules[ruleName]), { concurrency: 2 });
+  return Promise.map(Object.keys(rules), (ruleName) =>
+    downloadRule(projectId, branch, ruleName, rules[ruleName]), { concurrency: 2 });
 };
 
 /*
@@ -325,8 +329,8 @@ const downloadDatabaseScript = (projectId, branch, databaseName, scripts) => {
     downloads.push(downloadFile(projectId, branch, script)
       .then(file => {
         database.scripts.push({
-          stage: script.name,
-          contents: file.contents
+          name: script.name,
+          scriptFile: file.contents
         });
       })
     );
@@ -354,22 +358,32 @@ const getDatabaseScripts = (projectId, branch, files) => {
     }
   });
 
-  return Promise.map(Object.keys(databases), (databaseName) => downloadDatabaseScript(projectId, branch, databaseName, databases[databaseName]), { concurrency: 2 });
+  return Promise.map(Object.keys(databases), (databaseName) =>
+    downloadDatabaseScript(projectId, branch, databaseName, databases[databaseName]), { concurrency: 2 });
 };
 
 /*
  * Download a single page script.
  */
 const downloadPage = (projectId, branch, pageName, page) => {
+  const downloads = [];
   const currentPage = {
-    ...page,
+    metadata: false,
     name: pageName
   };
-  const downloads = [];
+
   if (page.file) {
     downloads.push(downloadFile(projectId, branch, page.file)
       .then(file => {
-        currentPage.contents = file.contents;
+        currentPage.htmlFile = file.contents;
+      }));
+  }
+
+  if (page.meta_file) {
+    downloads.push(downloadFile(projectId, branch, page.meta_file)
+      .then(file => {
+        currentPage.metadata = true;
+        currentPage.metadataFile = file.contents;
       }));
   }
 
@@ -382,22 +396,26 @@ const downloadPage = (projectId, branch, pageName, page) => {
  */
 const getPages = (projectId, branch, files) => {
   const pages = {};
+
   // Determine if we have the script, the metadata or both.
   _.filter(files, f => isPage(f.path)).forEach(file => {
     const pageName = path.parse(file.path).name;
     const ext = path.parse(file.path).ext;
-    const index = pageName + ext;
-    pages[index] = pages[pageName] || {};
-    pages[index].file = file;
-    pages[index].contents = null;
-    pages[index].path = file.path;
+    pages[pageName] = pages[pageName] || {};
 
-    if (ext !== 'json') {
-      pages[index].meta = `${path.parse(file.path).name}.json`;
+    if (ext !== '.json') {
+      pages[pageName].file = file;
+      pages[pageName].sha = file.sha;
+      pages[pageName].path = file.path;
+    } else {
+      pages[pageName].meta_file = file;
+      pages[pageName].meta_sha = file.sha;
+      pages[pageName].meta_path = file.path;
     }
   });
 
-  return Promise.map(Object.keys(pages), (pageName) => downloadPage(projectId, branch, pageName, pages[pageName]), { concurrency: 2 });
+  return Promise.map(Object.keys(pages), (pageName) =>
+    downloadPage(projectId, branch, pageName, pages[pageName]), { concurrency: 2 });
 };
 
 /*
@@ -416,9 +434,9 @@ export const getChanges = (projectId, branch) =>
 
       return Promise.props(promises)
         .then((result) => ({
-          rules: result.rules,
-          databases: result.databases,
-          pages: result.pages
+          rules: unifyScripts(result.rules),
+          databases: unifyDatabases(result.databases),
+          pages: unifyScripts(result.pages)
         }));
     });
 
