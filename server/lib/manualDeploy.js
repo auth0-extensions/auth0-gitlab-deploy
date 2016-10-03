@@ -1,5 +1,5 @@
 import { getProjectId } from './gitlab';
 import deploy from './deploy';
 
-export default (storageContext, id, branch, repository, sha, user) =>
-  getProjectId(repository).then(projectId => deploy(storageContext, id, projectId, branch, repository, sha, user));
+export default (storage, id, branch, repository, sha, user, client) =>
+  getProjectId(repository).then(projectId => deploy(storage, id, projectId, branch, repository, sha, user, client));

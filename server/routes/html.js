@@ -1,8 +1,8 @@
 import fs from 'fs';
-import url from 'url';
 import ejs from 'ejs';
 import path from 'path';
 
+import { urlHelpers } from 'auth0-extension-express-tools';
 import config from '../lib/config';
 
 export default () => {
@@ -20,7 +20,7 @@ export default () => {
     <link rel="stylesheet" type="text/css" href="https://cdn.auth0.com/manage/v0.3.1715/css/index.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.auth0.com/styleguide/4.6.13/index.css">
     <% if (assets.style) { %><link rel="stylesheet" type="text/css" href="/app/<%= assets.style %>"><% } %>
-    <% if (assets.version) { %><link rel="stylesheet" type="text/css" href="//dn.auth0.com/extensions/auth0-gitlab-deploy/assets/auth0-gitlab-deploy.ui.<%= assets.version %>.css"><% } %>
+    <% if (assets.version) { %><link rel="stylesheet" type="text/css" href="//cdn.auth0.com/extensions/auth0-gitlab-deploy/assets/auth0-gitlab-deploy.ui.<%= assets.version %>.css"><% } %>
   </head>
   <body class="a0-extension">
     <div id="app"></div>
@@ -40,12 +40,9 @@ export default () => {
   return (req, res) => {
     const settings = {
       AUTH0_DOMAIN: config('AUTH0_DOMAIN'),
-      BASE_URL: url.format({
-        protocol: config('NODE_ENV') !== 'production' ? 'http' : 'https',
-        host: req.get('host'),
-        pathname: url.parse(req.originalUrl || '').pathname.replace(req.path, '')
-      }),
-      BASE_PATH: url.parse(req.originalUrl || '').pathname.replace(req.path, '') + (req.path === '/admins' ? '/admins' : '')
+      BASE_URL: urlHelpers.getBaseUrl(req),
+      BASE_PATH: urlHelpers.getBasePath(req),
+      AUTH0_MANAGE_URL: config('AUTH0_MANAGE_URL') || 'http://manage.auth0.com'
     };
 
     // Render from CDN.

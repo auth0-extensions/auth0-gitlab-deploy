@@ -1,90 +1,24 @@
-import config from './config';
-import logger from './logger';
-import auth0 from './auth0';
+import { deploy as sourceDeploy } from 'auth0-source-control-extension-tools';
 
-import { pushToSlack } from './slack';
+import config from '../lib/config';
 import { getChanges } from './gitlab';
-import { appendProgress } from './storage';
-import { getForClient } from './managementApiClient';
 
-const trackProgress = (id, branch, repository, sha, user) => {
-  const logs = [];
-  const log = (message) => {
-    logs.push({ date: new Date(), message });
-    logger.debug(message);
+export default (storage, id, projectId, branch, repository, sha, user, client) => {
+  const version = (id === 'manual') ? sha : branch;
+
+  const context = {
+    init: () => getChanges(projectId, version)
+      .then(data => {
+        context.pages = data.pages;
+        context.rules = data.rules;
+        context.databases = data.databases;
+      })
   };
 
-  return {
-    id,
-    user,
-    sha,
-    branch,
-    repository,
-    date: new Date(),
-    connectionsUpdated: 0,
-    rulesCreated: 0,
-    rulesUpdated: 0,
-    rulesDeleted: 0,
-    error: null,
-    logs,
-    log
+  const slackTemplate = {
+    fallback: 'Gitlab to Auth0 Deployment',
+    text: 'Gitlab to Auth0 Deployment'
   };
-};
 
-
-export default (storageContext, id, project_id, branch, repository, sha, user) => {
-  const progress = trackProgress(id, branch, repository, sha, user);
-  let version;
-
-  if (id === 'manual') {
-    version = sha;
-    progress.log('Manual deployment triggered.');
-  } else {
-    version = branch;
-    progress.log(`Webhook received: ${id}.`);
-  }
-
-  progress.log('Loading GitLab tree...');
-  return getChanges(project_id, version)
-    .then(context => {
-      progress.log(`Assets: ${JSON.stringify({ id, user, ...context }, null, 2)}`);
-      progress.log(`Getting access token for ${config('AUTH0_CLIENT_ID')}/${config('AUTH0_DOMAIN')}`);
-
-      // Send all changes to Auth0.
-      return getForClient(config('AUTH0_DOMAIN'), config('AUTH0_CLIENT_ID'), config('AUTH0_CLIENT_SECRET'))
-        .then((client) => {
-          context.client = client;
-        })
-        .then(() => auth0.validateDatabases(progress,context.client, context.databases))
-        .then(() => auth0.validateRules(progress,context.client, context.rules))
-        .then(() => auth0.updateDatabases(progress, context.client, context.databases))
-        .then(() => auth0.deleteRules(progress, context.client, context.rules))
-        .then(() => auth0.updateRules(progress, context.client, context.rules))
-        .then(() => progress.log('Done.'));
-    })
-    .then(() => appendProgress(storageContext, progress))
-    .then(() => pushToSlack(progress, `${config('WT_URL')}/login`))
-    .then(() => ({
-      connections: {
-        updated: progress.connectionsUpdated
-      },
-      rules: {
-        created: progress.rulesCreated,
-        updated: progress.rulesUpdated,
-        deleted: progress.rulesDeleted
-      }
-    }))
-    .catch(err => {
-      // Log error and persist.
-      progress.error = err;
-      progress.log(`Error: ${err.message}`);
-      progress.log(`StackTrace: ${err.stack}`);
-      appendProgress(storageContext, progress);
-
-      // Final attempt to push to slack.
-      pushToSlack(progress, `${config('WT_URL')}/login`);
-
-      // Continue.
-      throw err;
-    });
+  return sourceDeploy({ id, branch, repository, sha, user }, context, client, storage, config, slackTemplate);
 };
