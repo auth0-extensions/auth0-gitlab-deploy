@@ -6,11 +6,11 @@ import deploy from '../lib/deploy';
 import { hasChanges } from '../lib/gitlab';
 import { gitlabWebhook } from '../lib/middlewares';
 
-export default () => {
+export default (storage) => {
   const activeBranch = config('GITLAB_BRANCH');
   const gitlabSecret = config('EXTENSION_SECRET');
 
-  const webhooks = express.Router();
+  const webhooks = express.Router(); // eslint-disable-line new-cap
   webhooks.post('/deploy', gitlabWebhook(gitlabSecret), (req, res, next) => {
     const { id, project_id, branch, commits, repository, user, sha } = req.webhook;
 
@@ -25,7 +25,7 @@ export default () => {
     }
 
     // Deploy the changes.
-    return deploy(req.storage, id, project_id, branch, repository, sha, user, req.auth0)
+    return deploy(storage, id, project_id, branch, repository, sha, user, req.auth0)
       .then(stats => res.status(200).json(stats))
       .catch(next);
   });
