@@ -23,7 +23,7 @@ class Alert extends Component {
 Alert.propTypes = {
   show: React.PropTypes.bool.isRequired,
   type: React.PropTypes.string.isRequired,
-  onClose: React.PropTypes.func.required
+  onClose: React.PropTypes.func.isRequired
 };
 
 export default Alert;

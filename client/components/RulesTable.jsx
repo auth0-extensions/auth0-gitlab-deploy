@@ -11,7 +11,7 @@ import {
 
 export default class RulesTable extends Component {
   static propTypes = {
-    rules: React.PropTypes.array.isRequired,
+    rules: React.PropTypes.object.isRequired,
     loading: React.PropTypes.bool.isRequired,
     saveManualRules: React.PropTypes.func.isRequired,
     openNotification: React.PropTypes.func.isRequired,

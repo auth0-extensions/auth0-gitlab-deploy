@@ -15,3 +15,28 @@ export function fetchConfiguration() { // eslint-disable-line import/prefer-defa
     }
   };
 }
+
+/*
+ * Close notification.
+ */
+export function closeNotification() {
+  return {
+    type: constants.CLOSE_NOTIFICATION,
+    payload: {
+      promise: axios.post('/api/notified', {
+        responseType: 'json'
+      })
+    }
+  };
+}
+
+export function confirmNotification() {
+  return {
+    type: constants.CONFIRM_NOTIFICATION,
+    payload: {
+      promise: axios.post('/api/notified', {
+        responseType: 'json'
+      })
+    }
+  };
+}

@@ -6,7 +6,7 @@ import createReducer from '../utils/createReducer';
 const initialState = {
   loading: false,
   error: null,
-  records: [],
+  records: {},
   showNotification: false,
   notificationType: 'success',
 };

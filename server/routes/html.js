@@ -28,7 +28,7 @@ export default () => {
     <script type="text/javascript" src="//cdn.auth0.com/manage/v0.3.1715/js/bundle.js"></script>
     <script type="text/javascript">window.config = <%- JSON.stringify(config) %>;</script>
     <% if (assets.vendors) { %><script type="text/javascript" src="/app/<%= assets.vendors %>"></script><% } %>
-    <% if (assets.app) { %><script type="text/javascript" src="/app/<%= assets.app %>"></script><% } %>
+    <% if (assets.app) { %><script type="text/javascript" src="http://localhost:3000/app/<%= assets.app %>"></script><% } %>
     <% if (assets.version) { %>
     <script type="text/javascript" src="//cdn.auth0.com/extensions/auth0-gitlab-deploy/assets/auth0-gitlab-deploy.ui.vendors.<%= assets.version %>.js"></script>
     <script type="text/javascript" src="//cdn.auth0.com/extensions/auth0-gitlab-deploy/assets/auth0-gitlab-deploy.ui.<%= assets.version %>.js"></script>
