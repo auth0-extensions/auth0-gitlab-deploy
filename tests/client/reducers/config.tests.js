@@ -5,7 +5,9 @@ import * as constants from '../../../client/constants';
 const initialState = {
   loading: false,
   error: null,
-  record: {}
+  record: {},
+  activeTab: 'config',
+  showNotification: false
 };
 
 describe('config reducer', () => {
@@ -26,7 +28,9 @@ describe('config reducer', () => {
       {
         loading: true,
         error: null,
-        record: {}
+        record: {},
+        activeTab: 'config',
+        showNotification: false
       }
     );
   });
@@ -45,7 +49,9 @@ describe('config reducer', () => {
       {
         loading: false,
         error: 'An error occured while loading the configuration: ERROR',
-        record: {}
+        record: {},
+        activeTab: 'config',
+        showNotification: false
       }
     );
   });
@@ -62,7 +68,9 @@ describe('config reducer', () => {
       {
         loading: false,
         error: 'An error occured while loading the configuration: ERROR',
-        record: {}
+        record: {},
+        activeTab: 'config',
+        showNotification: false
       }
     );
   });
@@ -73,7 +81,8 @@ describe('config reducer', () => {
         type: constants.FETCH_CONFIGURATION_FULFILLED,
         payload: {
           data: {
-            attribute: 'test'
+            attribute: 'test',
+            showNotification: true
           }
         }
       }).toJSON()
@@ -82,9 +91,108 @@ describe('config reducer', () => {
         loading: false,
         error: null,
         record: {
-          attribute: 'test'
-        }
+          attribute: 'test',
+          showNotification: true
+        },
+        activeTab: 'config',
+        showNotification: true
       }
     );
   });
+
+
+
+
+  it('should handle CLOSE_NOTIFICATION_PENDING', () => {
+    expect(
+      config(initialState, {
+        type: constants.CLOSE_NOTIFICATION_PENDING
+      }).toJSON()
+    ).toEqual(
+      {
+        loading: true,
+        error: null,
+        record: {},
+        activeTab: 'config',
+        showNotification: false
+      }
+    );
+  });
+  it('should handle CLOSE_NOTIFICATION_REJECTED', () => {
+    expect(
+      config(initialState, {
+        type: constants.CLOSE_NOTIFICATION_REJECTED
+      }).toJSON()
+    ).toEqual(
+      {
+        loading: false,
+        error: null,
+        record: {},
+        activeTab: 'config',
+        showNotification: false
+      }
+    );
+  });
+  it('should handle CLOSE_NOTIFICATION_FULFILLED', () => {
+    expect(
+      config(initialState, {
+        type: constants.CLOSE_NOTIFICATION_FULFILLED
+      }).toJSON()
+    ).toEqual(
+      {
+        loading: false,
+        error: null,
+        record: {},
+        activeTab: 'config',
+        showNotification: false
+      }
+    );
+  });
+  it('should handle CONFIRM_NOTIFICATION_PENDING', () => {
+    expect(
+      config(initialState, {
+        type: constants.CONFIRM_NOTIFICATION_PENDING
+      }).toJSON()
+    ).toEqual(
+      {
+        loading: true,
+        error: null,
+        record: {},
+        activeTab: 'config',
+        showNotification: false
+      }
+    );
+  });
+  it('should handle CONFIRM_NOTIFICATION_REJECTED', () => {
+    expect(
+      config(initialState, {
+        type: constants.CONFIRM_NOTIFICATION_REJECTED
+      }).toJSON()
+    ).toEqual(
+      {
+        loading: false,
+        error: null,
+        record: {},
+        activeTab: 'config',
+        showNotification: false
+      }
+    );
+  });
+
+  it('should handle CONFIRM_NOTIFICATION_FULFILLED', () => {
+    expect(
+      config(initialState, {
+        type: constants.CONFIRM_NOTIFICATION_FULFILLED
+      }).toJSON()
+    ).toEqual(
+      {
+        loading: false,
+        error: null,
+        record: {},
+        activeTab: 'rules',
+        showNotification: false
+      }
+    );
+  });
+
 });
