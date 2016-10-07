@@ -10,7 +10,7 @@ import hooks from './hooks';
 import webhooks from './webhooks';
 
 import config from '../lib/config';
-import deploy from '../lib/deploy';
+import manualDeploy from '../lib/manualDeploy';
 
 
 const getRepository = () => {
@@ -42,7 +42,7 @@ export default (storage) => {
     clientSecret: config('AUTH0_CLIENT_SECRET')
   }));
   routes.use('/.extensions', hooks());
-  routes.use('/', dashboardAdmins(config('AUTH0_DOMAIN'), 'Bitbucket Deployments', config('AUTH0_RTA')));
+  routes.use('/', dashboardAdmins(config('AUTH0_DOMAIN'), 'Gitlab Deployments', config('AUTH0_RTA')));
   routes.get('/', html());
   routes.use('/meta', meta());
   routes.use('/webhooks', webhooks(storage));
@@ -60,8 +60,8 @@ export default (storage) => {
         if (data.isNotified) {
           return {
             showNotification: false,
-            branch: config('BITBUCKET_BRANCH'),
             secret: config('EXTENSION_SECRET'),
+            branch: config('GITLAB_BRANCH'),
             repository: getRepository()
           };
         }
@@ -70,8 +70,8 @@ export default (storage) => {
           .then(existingRules => {
             const result = {
               showNotification: false,
-              branch: config('BITBUCKET_BRANCH'),
               secret: config('EXTENSION_SECRET'),
+              branch: config('GITLAB_BRANCH'),
               repository: getRepository()
             };
 
@@ -89,11 +89,11 @@ export default (storage) => {
   });
   routes.get('/api/deployments', requireUser, (req, res, next) =>
     storage.read()
-      .then(data => res.json(_.orderBy(data.deployments || [], ['date'], ['desc'])))
+      .then(data => res.json(_.orderBy(data.deployments || [], [ 'date' ], [ 'desc' ])))
       .catch(next)
   );
   routes.post('/api/deployments', requireUser, (req, res, next) => {
-    deploy(storage, 'manual', config('BITBUCKET_BRANCH'), getRepository(), (req.body && req.body.sha) || config('BITBUCKET_BRANCH'), req.user.sub, req.auth0)
+    manualDeploy(storage, 'manual', config('GITLAB_BRANCH'), getRepository(), (req.body && req.body.sha) || config('GITLAB_BRANCH'), req.user.sub, req.auth0)
       .then(stats => res.json(stats))
       .catch(next);
   });
