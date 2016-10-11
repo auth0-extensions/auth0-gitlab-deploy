@@ -6,6 +6,7 @@ import { Error } from '../components/Dashboard';
 
 import Help from '../components/Help';
 import WebhookSettings from '../components/WebhookSettings';
+import NotificationDialog from '../components/NotificationDialog';
 
 export default connectContainer(class extends Component {
   static stateToProps = (state) => ({
@@ -18,7 +19,10 @@ export default connectContainer(class extends Component {
 
   static propTypes = {
     config: PropTypes.object.isRequired,
-    fetchConfiguration: PropTypes.func.isRequired
+    fetchConfiguration: PropTypes.func.isRequired,
+    showNotification: PropTypes.bool,
+    closeNotification: PropTypes.func.isRequired,
+    confirmNotification: PropTypes.func.isRequired,
   }
 
   componentWillMount() {
@@ -26,14 +30,17 @@ export default connectContainer(class extends Component {
   }
 
   render() {
-    const { error, record } = this.props.config.toJS();
+    const { error, record, showNotification } = this.props.config.toJS();
 
     return (
       <div>
+        <NotificationDialog show={showNotification} onClose={this.props.closeNotification}
+                            onConfirm={this.props.confirmNotification} />
         <div className="row">
           <div className="col-xs-12">
             <Error message={error} />
-            <WebhookSettings secret={record.secret} payloadUrl={`${window.config.BASE_URL}/webhooks/deploy`} repository={record.repository} branch={record.branch} />
+            <WebhookSettings secret={record.secret} payloadUrl={`${window.config.BASE_URL}/webhooks/deploy`}
+                             repository={record.repository} branch={record.branch} />
           </div>
         </div>
         <div className="row">
