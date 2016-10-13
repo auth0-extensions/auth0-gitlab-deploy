@@ -48,7 +48,6 @@ describe('rules reducer', () => {
         records: {},
         showNotification: false,
         notificationType: 'success'
-
       }
     );
   });
@@ -84,6 +83,23 @@ describe('rules reducer', () => {
     );
   });
 
+  it('should handle UPDATE_MANUAL_RULES_REJECTED', () => {
+    expect(
+      rules(initialState, {
+        type: constants.UPDATE_MANUAL_RULES_REJECTED,
+        errorMessage: 'ERROR'
+      }).toJSON()
+    ).toEqual(
+      {
+        loading: false,
+        error: 'An error occured while updating the rules: ERROR',
+        records: {},
+        showNotification: false,
+        notificationType: 'success'
+      }
+    );
+  });
+
   it('should handle OPEN_RULE_NOTIFICATION', () => {
     expect(
       rules(initialState, {
@@ -92,7 +108,7 @@ describe('rules reducer', () => {
     ).toEqual(
       {
         loading: false,
-        error: null,
+        error: false,
         records: {},
         showNotification: true,
         notificationType: 'success'

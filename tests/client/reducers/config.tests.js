@@ -35,34 +35,11 @@ describe('config reducer', () => {
     );
   });
 
-  it('should handle FETCH_CONFIGURATION_REJECTED with data', () => {
+  it('should handle FETCH_CONFIGURATION_REJECTED', () => {
     expect(
       config(initialState, {
         type: constants.FETCH_CONFIGURATION_REJECTED,
-        payload: {
-          data: {
-            message: 'ERROR'
-          }
-        }
-      }).toJSON()
-    ).toEqual(
-      {
-        loading: false,
-        error: 'An error occured while loading the configuration: ERROR',
-        record: {},
-        activeTab: 'config',
-        showNotification: false
-      }
-    );
-  });
-
-  it('should handle FETCH_CONFIGURATION_REJECTED without data', () => {
-    expect(
-      config(initialState, {
-        type: constants.FETCH_CONFIGURATION_REJECTED,
-        payload: {
-          statusText: 'ERROR'
-        }
+        errorMessage: 'ERROR'
       }).toJSON()
     ).toEqual(
       {
