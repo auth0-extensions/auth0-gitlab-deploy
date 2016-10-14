@@ -1,6 +1,6 @@
-import { ArgumentError, UnauthorizedError } from '../errors';
+import { ArgumentError, UnauthorizedError } from 'auth0-extension-tools';
 
-const parse = (headers, { ref = '', commits = [], project = {}, project_id = '', user_email = '', event_name = '', checkout_sha = ''}) => {
+const parse = (headers, { ref = '', commits = [], project = {}, project_id = '', user_email = '', event_name = '', checkout_sha = '' }) => { // eslint-disable-line camelcase
   const refParts = ref.split('/');
 
   return {
@@ -28,6 +28,6 @@ module.exports = (secret) => (req, res, next) => {
     return next(new UnauthorizedError('The GitLab webhook secret is incorrect.'));
   }
 
-  req.webhook = parse(req.headers, req.body);
+  req.webhook = parse(req.headers, req.body); // eslint-disable-line no-param-reassign
   return next();
 };
