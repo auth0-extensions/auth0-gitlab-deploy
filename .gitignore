@@ -4,4 +4,6 @@ node_modules
 npm-debug.log
 dist
 .idea
+.nyc_output
 server/config.json
+server/data.json
