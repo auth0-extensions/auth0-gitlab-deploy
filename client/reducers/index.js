@@ -8,6 +8,6 @@ import { rules } from './rules';
 export default combineReducers({
   auth,
   config,
-  rules,
-  deployments
+  deployments,
+  rules
 });

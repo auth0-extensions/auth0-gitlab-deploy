@@ -1,13 +1,14 @@
 {
-  "title": "Gitlab Deployments",
+  "title": "GitLab Deployments",
   "name": "auth0-gitlab-deploy",
-  "version": "1.0.0",
+  "version": "2.0.",
   "author": "auth0",
-  "description": "This extension gives Auth0 customers the possibility to deploy Rules and Custom Database Connections from GitLab.",
+  "description": "This extension gives Auth0 customers the possibility to deploy Hosted Pages, Rules and Custom Database Connections from GitLab.",
   "type": "application",
+  "docsUrl": "https://auth0.com/docs/extensions/gitlab-deploy",
   "logoUrl": "https://cdn.auth0.com/extensions/auth0-gitlab-deploy/assets/logo.svg",
   "initialUrlPath": "/login",
-  "uninstallConfirmMessage": "Do you really want to uninstall this extension? Doing so will stop any Rules and Database Connection scripts from being deployed from GitLab to Auth0.",
+  "uninstallConfirmMessage": "Do you really want to uninstall this extension? Doing so will stop any Hosted Pages,  Rules and Database Connection scripts from being deployed from GitLab to Auth0",
   "repository": "https://github.com/auth0-extensions/auth0-gitlab-deploy",
   "keywords": [
     "auth0",
@@ -17,7 +18,7 @@
   "auth0": {
     "createClient": true,
     "onUninstallPath": "/.extensions/on-uninstall",
-    "scopes": "update:tenant_settings update:clients read:clients read:client_keys read:connections update:connections read:rules create:rules update:rules delete:rules delete:clients"
+    "scopes": "read:tenant_settings update:tenant_settings update:clients read:clients read:connections update:connections read:rules create:rules update:rules delete:rules delete:clients"
   },
   "secrets": {
     "GITLAB_REPOSITORY": {

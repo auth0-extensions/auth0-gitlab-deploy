@@ -12,7 +12,6 @@ import webhooks from './webhooks';
 import config from '../lib/config';
 import manualDeploy from '../lib/manualDeploy';
 
-
 const getRepository = () => {
   const repo = config('GITLAB_REPOSITORY');
 
@@ -35,7 +34,6 @@ const setNotified = (storage) =>
 
 export default (storage) => {
   const routes = router();
-
   routes.use(middlewares.managementApiClient({
     domain: config('AUTH0_DOMAIN'),
     clientId: config('AUTH0_CLIENT_ID'),

@@ -9,7 +9,6 @@ export function fetchAllRules() {
     type: constants.FETCH_RULES,
     payload: {
       promise: axios.get('/api/rules', {
-        timeout: 5000,
         responseType: 'json'
       })
     }

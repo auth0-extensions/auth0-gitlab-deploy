@@ -140,7 +140,7 @@ describe('deployments reducer', () => {
     ).toEqual(
       {
         loading: false,
-        error: 'An error occured while loading the deployments: ERROR',
+        error: 'An error occured while running the deployment: ERROR',
         records: [],
         activeRecord: null
       }

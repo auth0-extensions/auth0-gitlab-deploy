@@ -6,7 +6,7 @@ import createReducer from '../utils/createReducer';
 const initialState = {
   loading: false,
   error: null,
-  record: {},
+  record: { },
   showNotification: false,
   activeTab: 'config'
 };
@@ -15,7 +15,7 @@ export const config = createReducer(fromJS(initialState), { // eslint-disable-li
   [constants.FETCH_CONFIGURATION_PENDING]: (state) =>
     state.merge({
       loading: true,
-      record: {},
+      record: { },
       showNotification: false
     }),
   [constants.FETCH_CONFIGURATION_REJECTED]: (state, action) =>
@@ -45,10 +45,10 @@ export const config = createReducer(fromJS(initialState), { // eslint-disable-li
       loading: false
     }),
   [constants.CONFIRM_NOTIFICATION_PENDING]: (state) =>
-    state.merge({
-      loading: true,
-      showNotification: false
-    }),
+      state.merge({
+        loading: true,
+        showNotification: false
+      }),
   [constants.CONFIRM_NOTIFICATION_REJECTED]: (state) =>
     state.merge({
       loading: false
