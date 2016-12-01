@@ -1,12 +1,11 @@
 import axios from 'axios';
-import jwtDecode from 'jwt-decode';
-
 import * as constants from '../constants';
+import { isTokenExpired, decodeToken } from '../utils/auth';
 
 export function logout() {
   return (dispatch) => {
-    localStorage.removeItem('apiToken');
-    sessionStorage.removeItem('apiToken');
+    sessionStorage.removeItem('gitlab-deploy:apiToken');
+    window.location.href = `${window.config.BASE_URL}/logout`;
 
     dispatch({
       type: constants.LOGOUT_SUCCESS
@@ -16,27 +15,32 @@ export function logout() {
 
 export function loadCredentials() {
   return (dispatch) => {
-    const apiToken = sessionStorage.getItem('token');
+    const apiToken = sessionStorage.getItem('gitlab-deploy:apiToken');
     if (apiToken) {
-      const decodedToken = jwtDecode(apiToken);
+      const decodedToken = decodeToken(apiToken);
+      if (isTokenExpired(decodedToken)) {
+        return;
+      }
+
       axios.defaults.headers.common.Authorization = `Bearer ${apiToken}`;
 
+      sessionStorage.setItem('gitlab-deploy:apiToken', apiToken);
+
       dispatch({
-        type: constants.LOADED_TOKEN,
+        type: constants.RECIEVED_TOKEN,
         payload: {
-          apiToken
+          token: apiToken
         }
       });
 
       dispatch({
         type: constants.LOGIN_SUCCESS,
         payload: {
-          apiToken,
+          token: apiToken,
           decodedToken,
           user: decodedToken
         }
       });
-      return;
     }
   };
 }
