@@ -11,9 +11,14 @@ const options = {
   hot: true,
   inline: true,
   historyApiFallback: true,
-  proxy: {
-    '*': 'http://localhost:3001'
-  },
+  proxy: [
+    {
+      context: () => true,
+      target: {
+        port: 3001
+      }
+    }
+  ],
 
   quiet: false,
   noInfo: true,

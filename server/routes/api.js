@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import express from 'express';
+import { middlewares } from 'auth0-extension-express-tools';
 
 import rules from './rules';
 import config from '../lib/config';
@@ -27,6 +28,16 @@ const setNotified = (storage) =>
 
 export default (storage) => {
   const api = express.Router(); // eslint-disable-line new-cap
+  api.use(middlewares.authenticateAdmins({
+    credentialsRequired: true,
+    secret: config('EXTENSION_SECRET'),
+    audience: 'urn:gitlab-deploy',
+    baseUrl: config('PUBLIC_WT_URL'),
+    onLoginSuccess: (req, res, next) => {
+      next();
+    }
+  }));
+
   api.use('/rules', rules(storage));
 
   api.post('/notified', (req, res, next) => {

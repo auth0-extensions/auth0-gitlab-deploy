@@ -1,13 +1,13 @@
 {
   "title": "GitLab Deployments",
   "name": "auth0-gitlab-deploy",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "author": "auth0",
   "description": "This extension gives Auth0 customers the possibility to deploy Hosted Pages, Rules and Custom Database Connections from GitLab.",
   "type": "application",
   "docsUrl": "https://auth0.com/docs/extensions/gitlab-deploy",
   "logoUrl": "https://cdn.auth0.com/extensions/auth0-gitlab-deploy/assets/logo.svg",
-  "initialUrlPath": "/login",
+  "initialUrlPath": "/admins/login",
   "uninstallConfirmMessage": "Do you really want to uninstall this extension? Doing so will stop any Hosted Pages,  Rules and Database Connection scripts from being deployed from GitLab to Auth0",
   "repository": "https://github.com/auth0-extensions/auth0-gitlab-deploy",
   "keywords": [
