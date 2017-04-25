@@ -1,6 +1,6 @@
 {
   "name": "auth0-gitlab-deploy-extension",
-  "version": "2.1.0",
+  "version": "2.0.1",
   "description": "Auth0 GitLab Deployment Extension",
   "engines": {
     "node": "5.9.0"
@@ -34,6 +34,7 @@
     "auth0": "^2.4.0",
     "auth0-extension-express-tools": "1.1.0",
     "auth0-extension-tools": "1.2.1",
+    "auth0-extension-ui": "^1.0.1",
     "auth0-oauth2-express": "^1.1.8",
     "auth0-source-control-extension-tools": "2.5.0",
     "axios": "^0.15.0",
@@ -64,10 +65,11 @@
     "morgan": "^1.7.0",
     "nconf": "^0.8.4",
     "qs": "^6.3.0",
-    "react": "^15.3.2",
-    "react-dom": "^15.3.2",
-    "react-redux": "^4.4.5",
-    "redux": "^3.5.2",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.0",
+    "react-redux": "^4.4.6",
+    "react-router": "^4.1.1",
+    "redux": "^3.6.0",
     "redux-logger": "^2.6.1",
     "redux-promise-middleware": "^4.1.0",
     "redux-thunk": "^2.1.0",

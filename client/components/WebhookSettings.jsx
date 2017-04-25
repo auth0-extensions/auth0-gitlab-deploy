@@ -23,7 +23,7 @@ export default class WebhookSettings extends Component {
     return (
       <div>
         <h5>Webhook Settings</h5>
-        <p>A webhook has to be created in <strong><a href={`https://gitlab.com/${repository}/hooks`}>{repository}</a></strong> with the following settings to enable deployments from GitLab (<strong>{branch}</strong> branch).</p>
+        <p>A webhook has to be created in <strong><a href={`https://gitlab.com/${repository}/settings/integrations`}>{repository}</a></strong> with the following settings to enable deployments from GitLab (<strong>{branch}</strong> branch).</p>
         <form className="form-horizontal col-xs-9">
           <div className="form-group">
             <label className="col-xs-2 control-label">Payload URL</label>
