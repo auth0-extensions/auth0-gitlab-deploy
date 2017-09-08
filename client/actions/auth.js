@@ -5,7 +5,7 @@ import { isTokenExpired, decodeToken } from '../utils/auth';
 export function logout() {
   return (dispatch) => {
     sessionStorage.removeItem('gitlab-deploy:apiToken');
-    window.location.href = `${window.config.BASE_URL}/logout`;
+    window.location.href = `${window.config.BASE_URL}/admins/logout`;
 
     dispatch({
       type: constants.LOGOUT_SUCCESS
