@@ -31,6 +31,11 @@
       "default": "master",
       "required": true
     },
+    "GITLAB_URL": {
+      "description": "The url of GitLab instance",
+      "default": "https://gitlab.com",
+      "required": true
+    },
     "GITLAB_TOKEN": {
       "description": "Your personal access token for GitLab",
       "required": true,
