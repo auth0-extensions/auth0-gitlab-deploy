@@ -15,7 +15,7 @@ let gitlab = null;
 const getApi = () => {
   if (!gitlab) {
     gitlab = new GitLabApi({
-      url: config('GITLAB_URL') || 'https://intesens.gitlab.com',
+      url: config('GITLAB_URL') || 'https://gitlab.com',
       token: config('GITLAB_TOKEN')
     });
   }
