@@ -15,7 +15,7 @@ const parse = (headers, { ref = '', commits = [], project = {}, project_id = '',
   };
 };
 
-module.exports = (secret) => (req, res, next) => {
+export default (secret) => (req, res, next) => {
   if (!secret || secret.length === 0) {
     return next(new UnauthorizedError('The extension secret is not set, unable to verify webhook signature.'));
   }

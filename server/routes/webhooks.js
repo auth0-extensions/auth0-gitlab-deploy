@@ -4,7 +4,7 @@ import { middlewares } from 'auth0-extension-express-tools';
 import config from '../lib/config';
 import deploy from '../lib/deploy';
 import { hasChanges } from '../lib/gitlab';
-import { gitlabWebhook } from '../lib/middlewares';
+import gitlabWebhook from '../lib/middlewares/gitlabWebhook';
 
 export default (storage) => {
   const activeBranch = config('GITLAB_BRANCH');

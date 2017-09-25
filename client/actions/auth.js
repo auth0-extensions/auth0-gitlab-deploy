@@ -1,3 +1,4 @@
+/* global window, sessionStorage*/
 import axios from 'axios';
 import * as constants from '../constants';
 import { isTokenExpired, decodeToken } from '../utils/auth';

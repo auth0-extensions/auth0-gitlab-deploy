@@ -77,9 +77,6 @@ describe('config reducer', () => {
     );
   });
 
-
-
-
   it('should handle CLOSE_NOTIFICATION_PENDING', () => {
     expect(
       config(initialState, {
@@ -171,5 +168,4 @@ describe('config reducer', () => {
       }
     );
   });
-
 });

@@ -1,3 +1,4 @@
+/* global window */
 import qs from 'qs';
 import jwtDecode from 'jwt-decode';
 
