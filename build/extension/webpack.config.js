@@ -38,7 +38,7 @@ module.exports = externalModules.then((externals) => {
   externals.compatible.xml2js = true; // Local: 0.4.15 - Webtask: 0.4.8
 
   // Additional dependencies that are available in webtask.
-  externals.compatible.auth0 = 'auth0@2.4.0';
+  externals.compatible.auth0 = 'auth0@2.8.0';
   externals.compatible['auth0-oauth2-express'] = 'auth0-oauth2-express@1.1.5';
   externals.compatible['auth0-extension-tools'] = 'auth0-extension-tools@1.2.1';
   externals.compatible['jwks-rsa'] = 'jwks-rsa@1.1.1';
