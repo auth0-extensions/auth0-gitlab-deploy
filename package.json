@@ -1,6 +1,6 @@
 {
   "name": "auth0-gitlab-deploy-extension",
-  "version": "2.3.1",
+  "version": "2.2.0",
   "description": "Auth0 GitLab Deployment Extension",
   "engines": {
     "node": "5.9.0"
@@ -30,8 +30,8 @@
       "async",
       "auth0@2.8.0",
       "auth0-oauth2-express@1.1.5",
-      "auth0-extension-tools@1.3.1",
-      "auth0-extension-express-tools@1.1.4",
+      "auth0-extension-tools@1.3.0",
+      "auth0-extension-express-tools@1.1.5",
       "body-parser",
       "bluebird",
       "compression",
@@ -76,8 +76,8 @@
   "dependencies": {
     "async": "^1.5.2",
     "auth0": "^2.8.0",
-    "auth0-extension-express-tools": "1.1.4",
-    "auth0-extension-tools": "1.3.1",
+    "auth0-extension-express-tools": "1.1.5",
+    "auth0-extension-tools": "1.3.0",
     "auth0-extension-ui": "^1.0.1",
     "auth0-oauth2-express": "^1.1.8",
     "auth0-source-control-extension-tools": "2.5.1",
