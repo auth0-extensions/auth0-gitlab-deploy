@@ -32,9 +32,9 @@ export default (storage) => {
     }
 
     // Deploy the changes.
-    return deploy(storage, id, project_id, branch, repository, sha, user, req.auth0)
-      .then(stats => res.status(200).json(stats))
-      .catch(next);
+    res.status(201).send();
+
+    return deploy(storage, id, project_id, branch, repository, sha, user, req.auth0);
   });
 
   return webhooks;
