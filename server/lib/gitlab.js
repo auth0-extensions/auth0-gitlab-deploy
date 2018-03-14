@@ -343,36 +343,8 @@ const downloadConfigurable = (projectId, branch, itemName, item) => {
     name: itemName
   };
 
-  if (item.scriptFile) {
-    downloads.push(downloadFile(projectId, branch, item.scriptFile)
-      .then(file => {
-        currentItem.configFile = file.contents;
-      }));
-  }
-
-  if (item.metadataFile) {
-    downloads.push(downloadFile(projectId, branch, item.metadataFile)
-      .then(file => {
-        currentItem.metadata = true;
-        currentItem.metadataFile = file.contents;
-      }));
-  }
-
-  return Promise.all(downloads).then(() => currentItem);
-};
-
-/*
- * Download a single rule-config.
- */
-const downloadRuleConfig = (projectId, branch, ruleConfigName, ruleConfig) => {
-  const downloads = [];
-  const currentItem = {
-    metadata: false,
-    name: ruleConfigName
-  };
-
-  if (ruleConfig.file) {
-    downloads.push(downloadFile(projectId, branch, ruleConfig.file)
+  if (item.file) {
+    downloads.push(downloadFile(projectId, branch, item.file)
       .then(file => {
         currentItem.configFile = file.contents;
       }));
@@ -416,43 +388,14 @@ const getConfigurables = (projectId, branch, files, directory) => {
     const name = path.parse(file.path).name;
     configurables[name] = configurables[name] || {};
 
-    if (/\.js$/i.test(file.name)) {
-      configurables[name].script = true;
-      configurables[name].scriptFile = file;
-    } else if (/\.json$/i.test(file.name)) {
-      configurables[name].metadata = true;
-      configurables[name].metadataFile = file;
+    if (/\.json$/i.test(file.name)) {
+      configurables[name].file = file;
     }
   });
 
   // Download all rules.
   return Promise.map(Object.keys(configurables), (key) =>
     downloadConfigurable(projectId, branch, key, configurables[key]), { concurrency: 2 });
-};
-
-
-/*
- * Get all rule configs.
- */
-const getRuleConfigs = (projectId, branch, files) => {
-  const ruleConfigs = {};
-
-  _.filter(files, f => isConfigurable(f.path, constants.RULES_CONFIGS_DIRECTORY)).forEach(file => {
-    const key = path.parse(file.path).name;
-    const ext = path.parse(file.path).ext;
-
-    ruleConfigs[key] = ruleConfigs[key] || {};
-
-    if (ext === '.json') {
-      ruleConfigs[key].file = file;
-      ruleConfigs[key].sha = file.sha;
-      ruleConfigs[key].path = file.path;
-    }
-  });
-
-  // Download all rules.
-  return Promise.map(Object.keys(ruleConfigs), (configName) =>
-    downloadRuleConfig(projectId, branch, configName, ruleConfigs[configName]), { concurrency: 2 });
 };
 
 /*
@@ -572,7 +515,7 @@ export const getChanges = (projectId, branch) =>
         databases: getDatabaseScripts(projectId, branch, files),
         pages: getPages(projectId, branch, files),
         clients: getConfigurables(projectId, branch, files, constants.CLIENTS_DIRECTORY),
-        ruleConfigs: getRuleConfigs(projectId, branch, files),
+        ruleConfigs: getConfigurables(projectId, branch, files, constants.RULES_CONFIGS_DIRECTORY),
         resourceServers: getConfigurables(projectId, branch, files, constants.RESOURCE_SERVERS_DIRECTORY)
       };
 
