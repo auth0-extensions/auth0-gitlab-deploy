@@ -12,6 +12,9 @@ export default (storage, id, projectId, branch, repository, sha, user, client) =
         context.pages = data.pages;
         context.rules = data.rules;
         context.databases = data.databases;
+        context.clients = data.clients;
+        context.ruleConfigs = data.ruleConfigs;
+        context.resourceServers = data.resourceServers;
       })
   };
 

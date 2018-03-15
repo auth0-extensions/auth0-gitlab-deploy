@@ -42,6 +42,12 @@ const isPage = (file) =>
 file.indexOf(`${constants.PAGES_DIRECTORY}/`) === 0 && constants.PAGE_NAMES.indexOf(file.split('/').pop()) >= 0;
 
 /*
+ * Check if a file is part of configurable folder.
+ */
+const isConfigurable = (file, directory) =>
+  file.indexOf(`${directory}/`) === 0;
+
+/*
  * Get the details of a database file script.
  */
 const getDatabaseScriptDetails = (filename) => {
@@ -83,6 +89,12 @@ const validFilesOnly = (fileName) => {
     return true;
   } else if (isRule(fileName)) {
     return /\.(js|json)$/i.test(fileName);
+  } else if (isConfigurable(fileName, constants.CLIENTS_DIRECTORY)) {
+    return /\.(js|json)$/i.test(fileName);
+  } else if (isConfigurable(fileName, constants.RESOURCE_SERVERS_DIRECTORY)) {
+    return /\.(js|json)$/i.test(fileName);
+  } else if (isConfigurable(fileName, constants.RULES_CONFIGS_DIRECTORY)) {
+    return /\.(js|json)$/i.test(fileName);
   } else if (isDatabaseConnection(fileName)) {
     const script = getDatabaseScriptDetails(fileName);
     return !!script;
@@ -103,7 +115,7 @@ _.chain(commits)
   .length > 0;
 
 /*
- * Get rules tree.
+ * Get pages tree.
  */
 const getPagesTree = (projectId, branch) =>
   new Promise((resolve, reject) => {
@@ -127,6 +139,35 @@ const getPagesTree = (projectId, branch) =>
       reject(e);
     }
   });
+
+
+/*
+ * Get rules tree.
+ */
+const getConfigurablesTree = (projectId, branch, directory) =>
+  new Promise((resolve, reject) => {
+    try {
+      getApi().projects.repository.listTree(projectId, {
+        ref_name: branch,
+        path: directory
+      }, (res) => {
+        if (!res) {
+          return resolve([]);
+        }
+        const files = res
+          .filter(f => f.type === 'blob')
+          .filter(f => validFilesOnly(f.path));
+
+        files.forEach((elem, idx) => {
+          files[idx].path = `${directory}/${elem.name}`;
+        });
+        return resolve(files);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+
 
 /*
  * Get rules tree.
@@ -226,11 +267,14 @@ const getTree = (projectId, branch) => {
   const promises = {
     rules: getRulesTree(projectId, branch),
     connections: getConnectionsTree(projectId, branch),
-    pages: getPagesTree(projectId, branch)
+    pages: getPagesTree(projectId, branch),
+    clients: getConfigurablesTree(projectId, branch, constants.CLIENTS_DIRECTORY),
+    ruleConfigs: getConfigurablesTree(projectId, branch, constants.RULES_CONFIGS_DIRECTORY),
+    resourceServers: getConfigurablesTree(projectId, branch, constants.RESOURCE_SERVERS_DIRECTORY)
   };
 
   return Promise.props(promises)
-    .then((result) => (_.union(result.rules, result.connections, result.pages)));
+    .then((result) => (_.union(result.rules, result.connections, result.pages, result.clients, result.ruleConfigs, result.resourceServers)));
 };
 
 /*
@@ -290,6 +334,34 @@ const downloadRule = (projectId, branch, ruleName, rule) => {
 };
 
 /*
+ * Download a single configurable file.
+ */
+const downloadConfigurable = (projectId, branch, itemName, item) => {
+  const downloads = [];
+  const currentItem = {
+    metadata: false,
+    name: itemName
+  };
+
+  if (item.configFile) {
+    downloads.push(downloadFile(projectId, branch, item.configFile)
+      .then(file => {
+        currentItem.configFile = file.contents;
+      }));
+  }
+
+  if (item.metadataFile) {
+    downloads.push(downloadFile(projectId, branch, item.metadataFile)
+      .then(file => {
+        currentItem.metadata = true;
+        currentItem.metadataFile = file.contents;
+      }));
+  }
+
+  return Promise.all(downloads).then(() => currentItem);
+};
+
+/*
  * Determine if we have the script, the metadata or both.
  */
 const getRules = (projectId, branch, files) => {
@@ -312,6 +384,40 @@ const getRules = (projectId, branch, files) => {
   // Download all rules.
   return Promise.map(Object.keys(rules), (ruleName) =>
     downloadRule(projectId, branch, ruleName, rules[ruleName]), { concurrency: 2 });
+};
+
+/*
+ * Get all configurables from certain directory.
+ */
+const getConfigurables = (projectId, branch, files, directory) => {
+  const configurables = {};
+
+  _.filter(files, f => isConfigurable(f.path, directory)).forEach(file => {
+    let meta = false;
+    let name = path.parse(file.path).name;
+    const ext = path.parse(file.path).ext;
+    configurables[name] = configurables[name] || {};
+
+    if (ext === '.json') {
+      if (name.endsWith('.meta')) {
+        name = path.parse(name).name;
+        meta = true;
+      }
+
+      /* Initialize object if needed */
+      configurables[name] = configurables[name] || {};
+
+      if (meta) {
+        configurables[name].metadataFile = file;
+      } else {
+        configurables[name].configFile = file;
+      }
+    }
+  });
+
+  // Download all rules.
+  return Promise.map(Object.keys(configurables), (key) =>
+    downloadConfigurable(projectId, branch, key, configurables[key]), { concurrency: 2 });
 };
 
 /*
@@ -429,14 +535,20 @@ export const getChanges = (projectId, branch) =>
       const promises = {
         rules: getRules(projectId, branch, files),
         databases: getDatabaseScripts(projectId, branch, files),
-        pages: getPages(projectId, branch, files)
+        pages: getPages(projectId, branch, files),
+        clients: getConfigurables(projectId, branch, files, constants.CLIENTS_DIRECTORY),
+        ruleConfigs: getConfigurables(projectId, branch, files, constants.RULES_CONFIGS_DIRECTORY),
+        resourceServers: getConfigurables(projectId, branch, files, constants.RESOURCE_SERVERS_DIRECTORY)
       };
 
       return Promise.props(promises)
         .then((result) => ({
           rules: unifyScripts(result.rules),
           databases: unifyDatabases(result.databases),
-          pages: unifyScripts(result.pages)
+          pages: unifyScripts(result.pages),
+          clients: unifyScripts(result.clients),
+          ruleConfigs: unifyScripts(result.ruleConfigs),
+          resourceServers: unifyScripts(result.resourceServers)
         }));
     });
 
