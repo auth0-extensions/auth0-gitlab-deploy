@@ -343,10 +343,18 @@ const downloadConfigurable = (projectId, branch, itemName, item) => {
     name: itemName
   };
 
-  if (item.file) {
-    downloads.push(downloadFile(projectId, branch, item.file)
+  if (item.configFile) {
+    downloads.push(downloadFile(projectId, branch, item.configFile)
       .then(file => {
         currentItem.configFile = file.contents;
+      }));
+  }
+
+  if (item.metadataFile) {
+    downloads.push(downloadFile(projectId, branch, item.metadataFile)
+      .then(file => {
+        currentItem.metadata = true;
+        currentItem.metadataFile = file.contents;
       }));
   }
 
@@ -385,11 +393,25 @@ const getConfigurables = (projectId, branch, files, directory) => {
   const configurables = {};
 
   _.filter(files, f => isConfigurable(f.path, directory)).forEach(file => {
-    const name = path.parse(file.path).name;
+    let meta = false;
+    let name = path.parse(file.path).name;
+    const ext = path.parse(file.path).ext;
     configurables[name] = configurables[name] || {};
 
-    if (/\.json$/i.test(file.name)) {
-      configurables[name].file = file;
+    if (ext === '.json') {
+      if (name.endsWith('.meta')) {
+        name = path.parse(name).name;
+        meta = true;
+      }
+
+      /* Initialize object if needed */
+      configurables[name] = configurables[name] || {};
+
+      if (meta) {
+        configurables[name].metadataFile = file;
+      } else {
+        configurables[name].configFile = file;
+      }
     }
   });
 
