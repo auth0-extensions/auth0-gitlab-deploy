@@ -1,10 +1,10 @@
-import { Router as router } from 'express';
-import { middlewares } from 'auth0-extension-express-tools';
+const router = require('express').Router;
+const { middlewares } = require('auth0-extension-express-tools');
 
-import config from '../lib/config';
-import logger from '../lib/logger';
+const config = require('../lib/config');
+const logger = require('../lib/logger');
 
-export default () => {
+module.exports = () => {
   const hooks = router();
   const hookValidator = middlewares
     .validateHookToken(config('AUTH0_DOMAIN'), config('WT_URL'), config('EXTENSION_SECRET'));

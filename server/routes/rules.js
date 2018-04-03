@@ -1,7 +1,7 @@
-import _ from 'lodash';
-import express from 'express';
+const _ = require('lodash');
+const express = require('express');
 
-export default (storage) => {
+module.exports = (storage) => {
   const api = express.Router(); // eslint-disable-line new-cap
 
   api.get('/', (req, res, next) => {

@@ -1,8 +1,8 @@
-import expect from 'expect';
-import moment from 'moment';
+const expect = require('expect');
+const moment = require('moment');
 
-import { deployments } from '../../../client/reducers/deployments';
-import * as constants from '../../../client/constants';
+const { deployments } = require('../../../client/reducers/deployments');
+const constants = require('../../../client/constants');
 
 const initialState = {
   loading: false,

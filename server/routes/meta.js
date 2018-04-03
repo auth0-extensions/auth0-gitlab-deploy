@@ -1,7 +1,7 @@
-import express from 'express';
-import metadata from '../../webtask.json';
+const express = require('express');
+const metadata = require('../../webtask.json');
 
-export default () => {
+module.exports = () => {
   const api = express.Router(); // eslint-disable-line new-cap
   api.get('/', (req, res) => {
     res.status(200).send(metadata);

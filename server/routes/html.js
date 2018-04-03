@@ -1,11 +1,11 @@
-import fs from 'fs';
-import ejs from 'ejs';
-import path from 'path';
+const fs = require('fs');
+const ejs = require('ejs');
+const path = require('path');
 
-import { urlHelpers } from 'auth0-extension-express-tools';
-import config from '../lib/config';
+const { urlHelpers } = require('auth0-extension-express-tools');
+const config = require('../lib/config');
 
-export default () => {
+module.exports = () => {
   const template = `
   <!DOCTYPE html>
   <html lang="en">

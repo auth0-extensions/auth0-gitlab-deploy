@@ -1,6 +1,6 @@
-import expect from 'expect';
-import { rules } from '../../../client/reducers/rules';
-import * as constants from '../../../client/constants';
+const expect = require('expect');
+const { rules } = require('../../../client/reducers/rules');
+const constants = require('../../../client/constants');
 
 const initialState = {
   loading: false,

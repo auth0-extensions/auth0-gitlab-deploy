@@ -1,11 +1,11 @@
-import _ from 'lodash';
-import path from 'path';
-import Promise from 'bluebird';
-import GitLabApi from 'gitlab';
-import { constants, unifyDatabases, unifyScripts } from 'auth0-source-control-extension-tools';
+const _ = require('lodash');
+const path = require('path');
+const Promise = require('bluebird');
+const GitLabApi = require('gitlab');
+const { constants, unifyDatabases, unifyScripts } = require('auth0-source-control-extension-tools');
 
-import config from './config';
-import logger from '../lib/logger';
+const config = require('./config');
+const logger = require('../lib/logger');
 
 /*
  * GitLab API connection
@@ -105,7 +105,7 @@ const validFilesOnly = (fileName) => {
 /*
  * Get a flat list of changes and files that need to be added/updated/removed.
  */
-export const hasChanges = (commits) =>
+const hasChanges = (commits) =>
 _.chain(commits)
   .map(commit => _.union(commit.added, commit.modified, commit.removed))
   .flattenDeep()
@@ -457,7 +457,8 @@ const getDatabaseScripts = (projectId, branch, files) => {
     if (script) {
       databases[script.database] = databases[script.database] || [];
       databases[script.database].push({
-        ...script,
+        database: script.database,
+        name: script.name,
         id: file.id,
         path: file.path
       });
@@ -527,7 +528,7 @@ const getPages = (projectId, branch, files) => {
 /*
  * Get a list of all changes that need to be applied to rules and database scripts.
  */
-export const getChanges = (projectId, branch) =>
+const getChanges = (projectId, branch) =>
   getTree(projectId, branch)
     .then(files => {
       logger.debug(`Files in tree: ${JSON.stringify(files.map(file => ({ name: file.path, id: file.id })), null, 2)}`);
@@ -555,7 +556,7 @@ export const getChanges = (projectId, branch) =>
 /*
  * Get a project id by path.
  */
-export const getProjectId = (filePath) =>
+const getProjectId = (filePath) =>
   new Promise((resolve, reject) => {
     try {
       getApi().projects.all(projects => {
@@ -575,3 +576,9 @@ export const getProjectId = (filePath) =>
       reject(e);
     }
   });
+
+module.exports = {
+  hasChanges,
+  getChanges,
+  getProjectId
+};

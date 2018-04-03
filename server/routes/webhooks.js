@@ -1,12 +1,12 @@
-import express from 'express';
-import { middlewares } from 'auth0-extension-express-tools';
+const express = require('express');
+const { middlewares } = require('auth0-extension-express-tools');
 
-import config from '../lib/config';
-import deploy from '../lib/deploy';
-import { hasChanges } from '../lib/gitlab';
-import { gitlabWebhook } from '../lib/middlewares';
+const config = require('../lib/config');
+const deploy = require('../lib/deploy');
+const { hasChanges } = require('../lib/gitlab');
+const { gitlabWebhook } = require('../lib/middlewares');
 
-export default (storage) => {
+module.exports = (storage) => {
   const activeBranch = config('GITLAB_BRANCH');
   const gitlabSecret = config('EXTENSION_SECRET');
 

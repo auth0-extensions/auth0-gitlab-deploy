@@ -1,4 +1,4 @@
-import { ArgumentError, UnauthorizedError } from 'auth0-extension-tools';
+const { ArgumentError, UnauthorizedError } = require('auth0-extension-tools');
 
 const parse = (headers, { ref = '', commits = [], project = {}, project_id = '', user_email = '', event_name = '', checkout_sha = '' }) => { // eslint-disable-line camelcase
   const refParts = ref.split('/');

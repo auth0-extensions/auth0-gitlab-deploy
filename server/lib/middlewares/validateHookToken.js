@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-import config from '../config';
-import logger from '../logger';
+const config = require('../config');
+const logger = require('../logger');
 
 module.exports = (hookPath) =>
   (req, res, next) => {

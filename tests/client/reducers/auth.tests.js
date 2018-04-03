@@ -1,7 +1,7 @@
-import url from 'url';
-import expect from 'expect';
-import { auth } from '../../../client/reducers/auth';
-import * as constants from '../../../client/constants';
+const url = require('url');
+const expect = require('expect');
+const { auth } = require('../../../client/reducers/auth');
+const constants = require('../../../client/constants');
 
 const initialState = {
   error: null,

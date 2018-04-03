@@ -2,13 +2,6 @@ const path = require('path');
 const nconf = require('nconf');
 const logger = require('./server/lib/logger');
 
-// Initialize babel.
-require('babel-core/register')({
-  ignore: /node_modules/,
-  sourceMaps: !(process.env.NODE_ENV === 'production')
-});
-require('babel-polyfill');
-
 // Initialize configuration.
 nconf
   .argv()

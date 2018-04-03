@@ -1,9 +1,9 @@
-import { deploy as sourceDeploy } from 'auth0-source-control-extension-tools';
+const sourceDeploy = require('auth0-source-control-extension-tools').deploy;
 
-import config from '../lib/config';
-import { getChanges } from './gitlab';
+const config = require('../lib/config');
+const { getChanges } = require('./gitlab');
 
-export default (storage, id, projectId, branch, repository, sha, user, client) => {
+module.exports = (storage, id, projectId, branch, repository, sha, user, client) => {
   const version = (id === 'manual') ? sha : branch;
 
   const context = {

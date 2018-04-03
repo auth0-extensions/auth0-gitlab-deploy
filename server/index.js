@@ -1,14 +1,14 @@
-import join from 'url-join';
-import path from 'path';
-import morgan from 'morgan';
-import Express from 'express';
-import bodyParser from 'body-parser';
-import tools from 'auth0-extension-tools';
-import { middlewares, routes } from 'auth0-extension-express-tools';
+const join = require('url-join');
+const path = require('path');
+const morgan = require('morgan');
+const Express = require('express');
+const bodyParser = require('body-parser');
+const tools = require('auth0-extension-tools');
+const { middlewares, routes } = require('auth0-extension-express-tools');
 
-import api from './routes';
-import logger from './lib/logger';
-import config from './lib/config';
+const api = require('./routes');
+const logger = require('./lib/logger');
+const config = require('./lib/config');
 
 module.exports = (configProvider, storageProvider) => {
   config.setProvider(configProvider);

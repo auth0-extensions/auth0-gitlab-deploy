@@ -1,2 +1,7 @@
-export gitlabWebhook from './gitlabWebhook';
-export validateHookToken from './validateHookToken';
+const gitlabWebhook = require('./gitlabWebhook');
+const validateHookToken = require('./validateHookToken');
+
+module.exports = {
+  gitlabWebhook,
+  validateHookToken
+};

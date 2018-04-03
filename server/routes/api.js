@@ -1,10 +1,10 @@
-import _ from 'lodash';
-import express from 'express';
-import { middlewares } from 'auth0-extension-express-tools';
+const _ = require('lodash');
+const express = require('express');
+const { middlewares } = require('auth0-extension-express-tools');
 
-import rules from './rules';
-import config from '../lib/config';
-import manualDeploy from '../lib/manualDeploy';
+const rules = require('./rules');
+const config = require('../lib/config');
+const manualDeploy = require('../lib/manualDeploy');
 
 const getRepository = () => {
   const repo = config('GITLAB_REPOSITORY');
@@ -26,7 +26,7 @@ const setNotified = (storage) =>
     })
     .then(data => storage.write(data));
 
-export default (storage) => {
+module.exports = (storage) => {
   const api = express.Router(); // eslint-disable-line new-cap
 
   api.use(middlewares.authenticateAdmins({

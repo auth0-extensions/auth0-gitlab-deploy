@@ -1,12 +1,12 @@
-import { Router as router } from 'express';
+const router = require('express').Router;
 
-import api from './api';
-import html from './html';
-import meta from './meta';
-import hooks from './hooks';
-import webhooks from './webhooks';
+const api = require('./api');
+const html = require('./html');
+const meta = require('./meta');
+const hooks = require('./hooks');
+const webhooks = require('./webhooks');
 
-export default (storage) => {
+module.exports = (storage) => {
   const routes = router();
   routes.use('/.extensions', hooks());
   routes.get('/', html());
