@@ -79,7 +79,8 @@ module.exports = externalModules.then((externals) => {
           loader: 'babel',
           exclude(modulePath) {
             return /node_modules/.test(modulePath) &&
-              !/express-conditional-middleware/.test(modulePath);
+              !/express-conditional-middleware/.test(modulePath) &&
+              !/auth0-source-control-extension-tools/.test(modulePath);
           }
         },
         { test: /\.json$/, loader: 'json' }
