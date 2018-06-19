@@ -2,7 +2,6 @@
 assets/app/*
 node_modules
 npm-debug.log
-dist
 .idea
 .nyc_output
 server/config.json

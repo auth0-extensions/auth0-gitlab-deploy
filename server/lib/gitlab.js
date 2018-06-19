@@ -118,147 +118,110 @@ _.chain(commits)
  * Get pages tree.
  */
 const getPagesTree = (projectId, branch) =>
-  new Promise((resolve, reject) => {
-    try {
-      getApi().projects.repository.listTree(projectId, {
-        ref_name: branch,
-        path: constants.PAGES_DIRECTORY
-      }, (res) => {
-        if (!res) {
-          return resolve([]);
-        }
-        const files = res
-          .filter(f => f.type === 'blob')
-          .filter(f => validPagesOnly(f.name));
-        files.forEach((elem, idx) => {
-          files[idx].path = `${constants.PAGES_DIRECTORY}/${elem.name}`;
-        });
-        return resolve(files);
-      });
-    } catch (e) {
-      reject(e);
+  getApi().Repositories.tree(projectId, {
+    ref: branch,
+    path: constants.PAGES_DIRECTORY
+  }).then((res) => {
+    if (!res) {
+      return [];
     }
+    const files = res
+      .filter(f => f.type === 'blob')
+      .filter(f => validPagesOnly(f.name));
+    files.forEach((elem, idx) => {
+      files[idx].path = `${constants.PAGES_DIRECTORY}/${elem.name}`;
+    });
+    return files;
   });
-
 
 /*
  * Get rules tree.
  */
 const getConfigurablesTree = (projectId, branch, directory) =>
-  new Promise((resolve, reject) => {
-    try {
-      getApi().projects.repository.listTree(projectId, {
-        ref_name: branch,
-        path: directory
-      }, (res) => {
-        if (!res) {
-          return resolve([]);
-        }
-        const files = res
-          .filter(f => f.type === 'blob')
-          .filter(f => validFilesOnly(f.path));
-
-        files.forEach((elem, idx) => {
-          files[idx].path = `${directory}/${elem.name}`;
-        });
-        return resolve(files);
-      });
-    } catch (e) {
-      reject(e);
+  getApi().Repositories.tree(projectId, {
+    ref: branch,
+    path: directory
+  }).then((res) => {
+    if (!res) {
+      return [];
     }
-  });
+    const files = res
+      .filter(f => f.type === 'blob')
+      .filter(f => validFilesOnly(f.path));
 
+    files.forEach((elem, idx) => {
+      files[idx].path = `${directory}/${elem.name}`;
+    });
+    return files;
+  });
 
 /*
  * Get rules tree.
  */
 const getRulesTree = (projectId, branch) =>
-  new Promise((resolve, reject) => {
-    try {
-      getApi().projects.repository.listTree(projectId, {
-        ref_name: branch,
-        path: constants.RULES_DIRECTORY
-      }, (res) => {
-        if (!res) {
-          return resolve([]);
-        }
-
-        const files = res
-          .filter(f => f.type === 'blob')
-          .filter(f => validRulesOnly(f.name));
-
-        files.forEach((elem, idx) => {
-          files[idx].path = `${constants.RULES_DIRECTORY}/${elem.name}`;
-        });
-
-        return resolve(files);
-      });
-    } catch (e) {
-      reject(e);
+  getApi().Repositories.tree(projectId, { path: constants.RULES_DIRECTORY, ref: branch }).then((res) => {
+    if (!res) {
+      return [];
     }
-  });
 
+    const files = res
+      .filter(f => f.type === 'blob')
+      .filter(f => validRulesOnly(f.name));
+
+    files.forEach((elem, idx) => {
+      files[idx].path = `${constants.RULES_DIRECTORY}/${elem.name}`;
+    });
+
+    return files;
+  });
 /*
  * Get connection files for one db connection
  */
 const getConnectionTreeByPath = (projectId, branch, filePath) =>
-  new Promise((resolve, reject) => {
-    try {
-      getApi().projects.repository.listTree(projectId, {
-        ref_name: branch,
-        path: `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${filePath}`
-      }, (res) => {
-        if (!res) {
-          return resolve([]);
-        }
-
-        const files = res
-          .filter(f => f.type === 'blob')
-          .filter(f => validConnectionsOnly(f.name));
-
-        files.forEach((elem, idx) => {
-          files[idx].path = `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${filePath}/${elem.name}`;
-        });
-
-        return resolve(files);
-      });
-    } catch (e) {
-      reject(e);
+  getApi().Repositories.tree(projectId, {
+    ref: branch,
+    path: `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${filePath}`
+  }).then((res) => {
+    if (!res) {
+      return [];
     }
+
+    const files = res
+      .filter(f => f.type === 'blob')
+      .filter(f => validConnectionsOnly(f.name));
+
+    files.forEach((elem, idx) => {
+      files[idx].path = `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${filePath}/${elem.name}`;
+    });
+
+    return files;
   });
 
 /*
  * Get all files for all database-connections.
  */
 const getConnectionsTree = (projectId, branch) =>
-  new Promise((resolve, reject) => {
-    try {
-      getApi().projects.repository.listTree(projectId, {
-        ref_name: branch,
-        path: constants.DATABASE_CONNECTIONS_DIRECTORY
-      }, (res) => {
-        if (!res) {
-          return resolve([]);
-        }
-
-        const subdirs = res.filter(f => f.type === 'tree');
-        const promisses = [];
-        let files = [];
-
-        subdirs.forEach(subdir => {
-          promisses.push(getConnectionTreeByPath(projectId, branch, subdir.name).then(data => {
-            files = files.concat(data);
-          }));
-        });
-
-        return Promise.all(promisses)
-          .then(() => resolve(files));
-      });
-    } catch (e) {
-      reject(e);
+  getApi().Repositories.tree(projectId, {
+    ref: branch,
+    path: constants.DATABASE_CONNECTIONS_DIRECTORY
+  }).then((res) => {
+    if (!res) {
+      return [];
     }
-  });
 
+    const subdirs = res.filter(f => f.type === 'tree');
+    const promisses = [];
+    let files = [];
+
+    subdirs.forEach(subdir => {
+      promisses.push(getConnectionTreeByPath(projectId, branch, subdir.name).then(data => {
+        files = files.concat(data);
+      }));
+    });
+
+    return Promise.all(promisses)
+      .then(() => files);
+  });
 /*
  * Get full tree.
  */
@@ -281,25 +244,11 @@ const getTree = (projectId, branch) => {
  * Download a single file.
  */
 const downloadFile = (projectId, branch, file) =>
-  new Promise((resolve, reject) => {
-    try {
-      getApi().projects.repository.showFile(projectId, { ref: branch, file_path: file.path }, (data, err) => {
-        if (!data) {
-          logger.error(`Error downloading '${file.path}'`);
-          logger.error(err);
-
-          return reject(new Error(`Error downloading '${file.path}'`));
-        }
-
-        return resolve({
-          fileName: file.path,
-          contents: (new Buffer(data.content, 'base64')).toString()
-        });
-      });
-    } catch (e) {
-      reject(e);
-    }
-  });
+  getApi().RepositoryFiles.show(projectId, file.path, branch)
+    .then((data) => ({
+      fileName: file.path,
+      contents: (new Buffer(data.content, 'base64')).toString()
+    }));
 
 /*
  * Download a single rule with its metadata.
@@ -556,22 +505,16 @@ export const getChanges = (projectId, branch) =>
  * Get a project id by path.
  */
 export const getProjectId = (filePath) =>
-  new Promise((resolve, reject) => {
-    try {
-      getApi().projects.all(projects => {
-        if (!projects) {
-          return reject(new Error('Unable to determine project ID'));
-        }
-
-        const currentProject = projects.filter(f => f.path_with_namespace === filePath);
-
-        if (currentProject[0] && currentProject[0].id) {
-          return resolve(currentProject[0].id);
-        }
-
-        return reject(new Error('Unable to determine project ID'));
-      });
-    } catch (e) {
-      reject(e);
+  getApi().Projects.all({ owned: true }).then(projects => {
+    if (!projects) {
+      return Promise.reject(new Error('Unable to determine project ID'));
     }
+
+    const currentProject = projects.filter(f => f.path_with_namespace === filePath);
+
+    if (currentProject[0] && currentProject[0].id) {
+      return currentProject[0].id;
+    }
+
+    return Promise.reject(new Error('Unable to determine project ID'));
   });
