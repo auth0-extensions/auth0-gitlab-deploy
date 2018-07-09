@@ -2,7 +2,11 @@
 
 This extension makes it possible to deploy Rules and Database Connection scripts from GitLab to Auth0.
 
+### Node 8 Only
+Beginning with version 2.4, the Gitlab extension only works with Node 8 because of dependencies in `gitlab@3.4.2`. Please update according to [Migration Guide: Extensibility and Node 8](https://auth0.com/docs/migrations/guides/extensibility-node8) if you have not already.
+
 ## Usage
+
 There is more extensive documentation online for how the files are expected to be laid out to work with the source control configuration utilities [here](https://auth0.com/docs/extensions/gitlab-deploy).
 
 #### Organize your repository
