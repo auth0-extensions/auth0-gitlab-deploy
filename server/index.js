@@ -40,7 +40,7 @@ module.exports = (configProvider, storageProvider) => {
     rta: config('AUTH0_RTA').replace('https://', ''),
     domain: config('AUTH0_DOMAIN'),
     baseUrl: config('PUBLIC_WT_URL'),
-    clientName: 'GitLab Deploy Extension',
+    clientName: 'GitLab Deploy Extension Snapshot',
     urlPrefix: '/admins',
     sessionStorageKey: 'gitlab-deploy:apiToken',
     scopes: 'read:tenant_settings update:tenant_settings create:clients read:clients update:clients read:connections update:connections read:rules create:rules update:rules delete:rules delete:clients read:resource_servers create:resource_servers update:resource_servers read:rules_configs delete:rules_configs update:rules_configs'

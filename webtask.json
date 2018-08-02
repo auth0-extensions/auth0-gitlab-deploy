@@ -1,6 +1,6 @@
 {
-  "title": "GitLab Deployments",
-  "name": "auth0-gitlab-deploy",
+  "title": "GitLab Deployments Snapshot",
+  "name": "auth0-gitlab-deploy-snapshot",
   "version": "2.4.0",
   "preVersion": "2.3.1",
   "author": "auth0",
