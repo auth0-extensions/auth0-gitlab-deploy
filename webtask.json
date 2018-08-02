@@ -1,10 +1,12 @@
 {
   "title": "GitLab Deployments Snapshot",
   "name": "auth0-gitlab-deploy-snapshot",
-  "version": "2.2.0",
+  "version": "2.4.0",
+  "preVersion": "2.3.1",
   "author": "auth0",
   "description": "This extension gives Auth0 customers the possibility to deploy Hosted Pages, Rules and Custom Database Connections from GitLab.",
   "type": "application",
+  "category": "source_control",
   "docsUrl": "https://auth0.com/docs/extensions/gitlab-deploy",
   "logoUrl": "https://cdn.auth0.com/extensions/auth0-gitlab-deploy/assets/logo.svg",
   "initialUrlPath": "/login",
@@ -18,7 +20,7 @@
   "auth0": {
     "createClient": true,
     "onUninstallPath": "/.extensions/on-uninstall",
-    "scopes": "read:tenant_settings update:tenant_settings update:clients read:clients read:connections update:connections read:rules create:rules update:rules delete:rules delete:clients"
+    "scopes": "read:tenant_settings update:tenant_settings create:clients read:clients update:clients read:connections update:connections read:rules create:rules update:rules delete:rules delete:clients read:resource_servers create:resource_servers update:resource_servers read:rules_configs delete:rules_configs update:rules_configs"
   },
   "secrets": {
     "GITLAB_REPOSITORY": {

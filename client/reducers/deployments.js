@@ -22,7 +22,6 @@ export const deployments = createReducer(fromJS(initialState), { // eslint-disab
     }),
   [constants.FETCH_DEPLOYMENTS_PENDING]: (state) =>
     state.merge({
-      error: null,
       loading: true,
       records: []
     }),
