@@ -2,10 +2,10 @@ import _ from 'lodash';
 import path from 'path';
 import Promise from 'bluebird';
 import GitLabApi from 'gitlab';
-import { constants, unifyDatabases, unifyScripts } from 'auth0-source-control-extension-tools';
+import { constants } from 'auth0-source-control-extension-tools';
 
 import config from './config';
-import logger from '../lib/logger';
+import logger from './logger';
 
 /*
  * GitLab API connection
@@ -46,6 +46,77 @@ file.indexOf(`${constants.PAGES_DIRECTORY}/`) === 0 && constants.PAGE_NAMES.inde
  */
 const isConfigurable = (file, directory) =>
   file.indexOf(`${directory}/`) === 0;
+
+const unifyItem = (item, type) => {
+  switch (type) {
+    default:
+    case 'rules': {
+      let meta = {};
+      try {
+        meta = JSON.parse(item.metadataFile);
+      } catch (e) {
+        logger.info(`Cannot parse metadata of ${item.name} ${type}`);
+      }
+
+      const { order = 0, enabled = true, stage = 'login_success' } = meta;
+      return ({ script: item.scriptFile, name: item.name, order, stage, enabled });
+    }
+
+    case 'pages': {
+      let meta = {};
+      try {
+        meta = JSON.parse(item.metadataFile);
+      } catch (e) {
+        logger.info(`Cannot parse metadata of ${item.name} ${type}`);
+      }
+
+      const { enabled = true } = meta;
+      return ({ html: item.htmlFile, name: item.name, enabled });
+    }
+
+    case 'databases': {
+      const customScripts = {};
+      _.forEach(item.scripts, (script) => { customScripts[script.name] = script.scriptFile; });
+
+      return ({ strategy: 'auth0', name: item.name, options: { customScripts, enabledDatabaseCustomization: true } });
+    }
+
+    case 'resourceServers':
+    case 'clients': {
+      let meta = {};
+      let data = {};
+      try {
+        data = JSON.parse(item.configFile);
+      } catch (e) {
+        logger.info(`Cannot parse config of ${item.name} ${type}`);
+      }
+      try {
+        meta = JSON.parse(item.metadataFile);
+      } catch (e) {
+        logger.info(`Cannot parse metadata of ${item.name} ${type}`);
+      }
+
+      return ({ name: item.name, ...meta, ...data });
+    }
+
+    case 'rulesConfigs': {
+      let data = {};
+      try {
+        data = JSON.parse(item.configFile);
+      } catch (e) {
+        logger.info(`Cannot parse config of ${item.name} ${type}`);
+      }
+
+      return ({ key: item.name, value: data.value });
+    }
+  }
+};
+
+const unifyData = (data, type) => {
+  const result = [];
+  _.forEach(data, (item) => result.push(unifyItem(item, type)));
+  return result;
+};
 
 /*
  * Get the details of a database file script.
@@ -232,12 +303,12 @@ const getTree = (projectId, branch) => {
     connections: getConnectionsTree(projectId, branch),
     pages: getPagesTree(projectId, branch),
     clients: getConfigurablesTree(projectId, branch, constants.CLIENTS_DIRECTORY),
-    ruleConfigs: getConfigurablesTree(projectId, branch, constants.RULES_CONFIGS_DIRECTORY),
+    rulesConfigs: getConfigurablesTree(projectId, branch, constants.RULES_CONFIGS_DIRECTORY),
     resourceServers: getConfigurablesTree(projectId, branch, constants.RESOURCE_SERVERS_DIRECTORY)
   };
 
   return Promise.props(promises)
-    .then((result) => (_.union(result.rules, result.connections, result.pages, result.clients, result.ruleConfigs, result.resourceServers)));
+    .then((result) => (_.union(result.rules, result.connections, result.pages, result.clients, result.rulesConfigs, result.resourceServers)));
 };
 
 /*
@@ -486,18 +557,18 @@ export const getChanges = (projectId, branch) =>
         databases: getDatabaseScripts(projectId, branch, files),
         pages: getPages(projectId, branch, files),
         clients: getConfigurables(projectId, branch, files, constants.CLIENTS_DIRECTORY),
-        ruleConfigs: getConfigurables(projectId, branch, files, constants.RULES_CONFIGS_DIRECTORY),
+        rulesConfigs: getConfigurables(projectId, branch, files, constants.RULES_CONFIGS_DIRECTORY),
         resourceServers: getConfigurables(projectId, branch, files, constants.RESOURCE_SERVERS_DIRECTORY)
       };
 
       return Promise.props(promises)
         .then((result) => ({
-          rules: unifyScripts(result.rules),
-          databases: unifyDatabases(result.databases),
-          pages: unifyScripts(result.pages),
-          clients: unifyScripts(result.clients),
-          ruleConfigs: unifyScripts(result.ruleConfigs),
-          resourceServers: unifyScripts(result.resourceServers)
+          rules: unifyData(result.rules, 'rules'),
+          databases: unifyData(result.databases, 'databases'),
+          pages: unifyData(result.pages, 'pages'),
+          clients: unifyData(result.clients, 'clients'),
+          rulesConfigs: unifyData(result.rulesConfigs, 'rulesConfigs'),
+          resourceServers: unifyData(result.resourceServers, 'resourceServers')
         }));
     });
 
