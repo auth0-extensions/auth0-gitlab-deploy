@@ -112,9 +112,13 @@ const unifyItem = (item, type) => {
   }
 };
 
-const unifyData = (data, type) => {
-  const result = [];
-  _.forEach(data, (item) => result.push(unifyItem(item, type)));
+const unifyData = (assets) => {
+  const result = {};
+  _.forEach(assets, (data, type) => {
+    result[type] = [];
+    _.forEach(data, (item) => result[type].push(unifyItem(item, type)));
+  });
+
   return result;
 };
 
@@ -562,14 +566,7 @@ export const getChanges = (projectId, branch) =>
       };
 
       return Promise.props(promises)
-        .then((result) => ({
-          rules: unifyData(result.rules, 'rules'),
-          databases: unifyData(result.databases, 'databases'),
-          pages: unifyData(result.pages, 'pages'),
-          clients: unifyData(result.clients, 'clients'),
-          rulesConfigs: unifyData(result.rulesConfigs, 'rulesConfigs'),
-          resourceServers: unifyData(result.resourceServers, 'resourceServers')
-        }));
+        .then((result) => unifyData(result));
     });
 
 /*
