@@ -44,7 +44,7 @@ export default (storage, id, projectId, branch, repository, sha, user, client) =
     .then(report => sendToSlack(report, `${config('WT_URL')}/login`, config('SLACK_INCOMING_WEBHOOK_URL')))
     .catch(err => {
       return saveProgress(null, err.message || err)
-        .then((report) => sendToSlack(report, `${config('WT_URL')}/login`, 'localhost'))
+        .then((report) => sendToSlack(report, `${config('WT_URL')}/login`, config('SLACK_INCOMING_WEBHOOK_URL')))
         .then(() => Promise.reject(err));
     });
 };
