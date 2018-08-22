@@ -67,7 +67,6 @@ export default function (progress, extensionUrl, hook) {
   logger.log('Sending progress to Slack.');
 
   const msg = createPayload(progress, extensionUrl);
-  console.log(JSON.stringify(msg, null, ' '));
   return new Promise((resolve) => {
     request
       .post(hook)
