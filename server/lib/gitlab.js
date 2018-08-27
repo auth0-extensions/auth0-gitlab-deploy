@@ -505,7 +505,7 @@ export const getChanges = (projectId, branch) =>
  * Get a project id by path.
  */
 export const getProjectId = (filePath) =>
-  getApi().Projects.all({ owned: true }).then(projects => {
+  getApi().Projects.all({ membership: true }).then(projects => {
     if (!projects) {
       return Promise.reject(new Error('Unable to determine project ID'));
     }
