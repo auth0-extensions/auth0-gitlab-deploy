@@ -8,7 +8,7 @@ logger.info('Running development webpack server...');
 
 const options = {
   publicPath: 'http://localhost:3000/app/',
-  disableHostCheck: true,
+  disableHostCheck: false,
   hot: true,
   inline: true,
   historyApiFallback: true,
