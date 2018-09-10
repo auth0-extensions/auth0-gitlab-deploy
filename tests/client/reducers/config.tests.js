@@ -44,7 +44,7 @@ describe('config reducer', () => {
     ).toEqual(
       {
         loading: false,
-        error: 'An error occured while loading the configuration: ERROR',
+        error: 'An error occurred while loading the configuration: ERROR',
         record: {},
         activeTab: 'config',
         showNotification: false
