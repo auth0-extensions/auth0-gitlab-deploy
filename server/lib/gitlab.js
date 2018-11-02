@@ -23,29 +23,43 @@ const getApi = () => {
   return gitlab;
 };
 
+const getBaseDir = () => {
+  let baseDir = config('BASE_DIR') || '';
+  if (baseDir.startsWith('/')) baseDir = baseDir.slice(1);
+  if (baseDir !== '' && !baseDir.endsWith('/')) baseDir += '/';
+
+  return baseDir;
+};
+
 /*
  * Check if a file is part of the rules folder.
  */
 const isRule = (fileName) =>
-fileName.indexOf(`${constants.RULES_DIRECTORY}/`) === 0;
+  fileName.indexOf(`${getBaseDir()}${constants.RULES_DIRECTORY}/`) === 0;
 
 /*
  * Check if a file is part of the database folder.
  */
 const isDatabaseConnection = (fileName) =>
-fileName.indexOf(`${constants.DATABASE_CONNECTIONS_DIRECTORY}/`) === 0;
+  fileName.indexOf(`${getBaseDir()}${constants.DATABASE_CONNECTIONS_DIRECTORY}/`) === 0;
 
 /*
- * Check if a file is part of the page folder.
+ * Check if a file is part of the templates folder - emails or pages.
  */
-const isPage = (file) =>
-file.indexOf(`${constants.PAGES_DIRECTORY}/`) === 0 && constants.PAGE_NAMES.indexOf(file.split('/').pop()) >= 0;
+const isTemplates = (file, dir, allowedNames) =>
+  file.indexOf(`${getBaseDir()}${dir}/`) === 0 && allowedNames.indexOf(file.split('/').pop()) >= 0;
+
+/*
+ * Check if a file is email provider.
+ */
+const isEmailProvider = (file) =>
+  file === `${getBaseDir()}${constants.EMAIL_TEMPLATES_DIRECTORY}/provider.json`;
 
 /*
  * Check if a file is part of configurable folder.
  */
 const isConfigurable = (file, directory) =>
-  file.indexOf(`${directory}/`) === 0;
+  file.indexOf(`${getBaseDir()}${directory}/`) === 0;
 
 const unifyItem = (item, type) => {
   switch (type) {
@@ -74,6 +88,28 @@ const unifyItem = (item, type) => {
       return ({ html: item.htmlFile, name: item.name, enabled });
     }
 
+    case 'emailTemplates': {
+      if (item.name === 'provider') return null;
+      let meta = item.metadataFile || {};
+      try {
+        meta = JSON.parse(item.metadataFile);
+      } catch (e) {
+        logger.info(`Cannot parse metadata of ${item.name} ${type}`);
+      }
+      return ({ ...meta, body: item.htmlFile });
+    }
+
+    case 'clientGrants':
+    case 'emailProvider': {
+      let data = item.configFile || {};
+      try {
+        data = JSON.parse(item.configFile);
+      } catch (e) {
+        logger.info(`Cannot parse metadata of ${item.name} ${type}`);
+      }
+      return ({ ...data });
+    }
+
     case 'databases': {
       const customScripts = {};
       _.forEach(item.scripts, (script) => { customScripts[script.name] = script.scriptFile; });
@@ -82,6 +118,7 @@ const unifyItem = (item, type) => {
     }
 
     case 'resourceServers':
+    case 'connections':
     case 'clients': {
       let meta = {};
       let data = {};
@@ -116,7 +153,14 @@ const unifyData = (assets) => {
   const result = {};
   _.forEach(assets, (data, type) => {
     result[type] = [];
-    _.forEach(data, (item) => result[type].push(unifyItem(item, type)));
+    if (Array.isArray(data)) {
+      _.forEach(data, (item) => {
+        const unified = unifyItem(item, type);
+        if (unified) result[type].push(unified);
+      });
+    } else {
+      result[type] = unifyItem(data, type);
+    }
   });
 
   return result;
@@ -154,17 +198,25 @@ const validConnectionsOnly = (fileName) => /\.(js)$/i.test(fileName);
  * Only valid pages files
  */
 const validPagesOnly = (fileName) =>
-constants.PAGE_NAMES.indexOf(fileName) >= 0;
+  constants.PAGE_NAMES.indexOf(fileName) >= 0;
 
 /*
  * Only Javascript and JSON files.
  */
 const validFilesOnly = (fileName) => {
-  if (isPage(fileName)) {
+  if (isTemplates(fileName, constants.PAGES_DIRECTORY, constants.PAGE_NAMES)) {
+    return true;
+  } else if (isTemplates(fileName, constants.EMAIL_TEMPLATES_DIRECTORY, constants.EMAIL_TEMPLATES_NAMES)) {
+    return true;
+  } else if (isEmailProvider(fileName)) {
     return true;
   } else if (isRule(fileName)) {
     return /\.(js|json)$/i.test(fileName);
   } else if (isConfigurable(fileName, constants.CLIENTS_DIRECTORY)) {
+    return /\.(js|json)$/i.test(fileName);
+  } else if (isConfigurable(fileName, constants.CLIENTS_GRANTS_DIRECTORY)) {
+    return /\.(js|json)$/i.test(fileName);
+  } else if (isConfigurable(fileName, constants.CONNECTIONS_DIRECTORY)) {
     return /\.(js|json)$/i.test(fileName);
   } else if (isConfigurable(fileName, constants.RESOURCE_SERVERS_DIRECTORY)) {
     return /\.(js|json)$/i.test(fileName);
@@ -190,32 +242,12 @@ _.chain(commits)
   .length > 0;
 
 /*
- * Get pages tree.
+ * Get by given path.
  */
-const getPagesTree = (projectId, branch) =>
+const getTreeByPath = (projectId, branch, directory) =>
   getApi().Repositories.tree(projectId, {
     ref: branch,
-    path: constants.PAGES_DIRECTORY
-  }).then((res) => {
-    if (!res) {
-      return [];
-    }
-    const files = res
-      .filter(f => f.type === 'blob')
-      .filter(f => validPagesOnly(f.name));
-    files.forEach((elem, idx) => {
-      files[idx].path = `${constants.PAGES_DIRECTORY}/${elem.name}`;
-    });
-    return files;
-  });
-
-/*
- * Get rules tree.
- */
-const getConfigurablesTree = (projectId, branch, directory) =>
-  getApi().Repositories.tree(projectId, {
-    ref: branch,
-    path: directory
+    path: getBaseDir() + directory
   }).then((res) => {
     if (!res) {
       return [];
@@ -225,37 +257,18 @@ const getConfigurablesTree = (projectId, branch, directory) =>
       .filter(f => validFilesOnly(f.path));
 
     files.forEach((elem, idx) => {
-      files[idx].path = `${directory}/${elem.name}`;
+      files[idx].path = `${getBaseDir()}${directory}/${elem.name}`;
     });
     return files;
   });
 
-/*
- * Get rules tree.
- */
-const getRulesTree = (projectId, branch) =>
-  getApi().Repositories.tree(projectId, { path: constants.RULES_DIRECTORY, ref: branch }).then((res) => {
-    if (!res) {
-      return [];
-    }
-
-    const files = res
-      .filter(f => f.type === 'blob')
-      .filter(f => validRulesOnly(f.name));
-
-    files.forEach((elem, idx) => {
-      files[idx].path = `${constants.RULES_DIRECTORY}/${elem.name}`;
-    });
-
-    return files;
-  });
 /*
  * Get connection files for one db connection
  */
-const getConnectionTreeByPath = (projectId, branch, filePath) =>
+const getDBConnectionTreeByPath = (projectId, branch, filePath) =>
   getApi().Repositories.tree(projectId, {
     ref: branch,
-    path: `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${filePath}`
+    path: `${getBaseDir()}${constants.DATABASE_CONNECTIONS_DIRECTORY}/${filePath}`
   }).then((res) => {
     if (!res) {
       return [];
@@ -266,7 +279,7 @@ const getConnectionTreeByPath = (projectId, branch, filePath) =>
       .filter(f => validConnectionsOnly(f.name));
 
     files.forEach((elem, idx) => {
-      files[idx].path = `${constants.DATABASE_CONNECTIONS_DIRECTORY}/${filePath}/${elem.name}`;
+      files[idx].path = `${getBaseDir()}${constants.DATABASE_CONNECTIONS_DIRECTORY}/${filePath}/${elem.name}`;
     });
 
     return files;
@@ -275,10 +288,10 @@ const getConnectionTreeByPath = (projectId, branch, filePath) =>
 /*
  * Get all files for all database-connections.
  */
-const getConnectionsTree = (projectId, branch) =>
+const getDBConnectionsTree = (projectId, branch) =>
   getApi().Repositories.tree(projectId, {
     ref: branch,
-    path: constants.DATABASE_CONNECTIONS_DIRECTORY
+    path: getBaseDir() + constants.DATABASE_CONNECTIONS_DIRECTORY
   }).then((res) => {
     if (!res) {
       return [];
@@ -289,7 +302,7 @@ const getConnectionsTree = (projectId, branch) =>
     let files = [];
 
     subdirs.forEach(subdir => {
-      promisses.push(getConnectionTreeByPath(projectId, branch, subdir.name).then(data => {
+      promisses.push(getDBConnectionTreeByPath(projectId, branch, subdir.name).then(data => {
         files = files.concat(data);
       }));
     });
@@ -303,16 +316,29 @@ const getConnectionsTree = (projectId, branch) =>
 const getTree = (projectId, branch) => {
   // Getting separate trees for rules and connections, as GitLab does not provide full (recursive) tree
   const promises = {
-    rules: getRulesTree(projectId, branch),
-    connections: getConnectionsTree(projectId, branch),
-    pages: getPagesTree(projectId, branch),
-    clients: getConfigurablesTree(projectId, branch, constants.CLIENTS_DIRECTORY),
-    rulesConfigs: getConfigurablesTree(projectId, branch, constants.RULES_CONFIGS_DIRECTORY),
-    resourceServers: getConfigurablesTree(projectId, branch, constants.RESOURCE_SERVERS_DIRECTORY)
+    rules: getTreeByPath(projectId, branch, constants.RULES_DIRECTORY),
+    databases: getDBConnectionsTree(projectId, branch),
+    emails: getTreeByPath(projectId, branch, constants.EMAIL_TEMPLATES_DIRECTORY),
+    pages: getTreeByPath(projectId, branch, constants.PAGES_DIRECTORY),
+    clients: getTreeByPath(projectId, branch, constants.CLIENTS_DIRECTORY),
+    clientGrants: getTreeByPath(projectId, branch, constants.CLIENTS_GRANTS_DIRECTORY),
+    connections: getTreeByPath(projectId, branch, constants.CONNECTIONS_DIRECTORY),
+    rulesConfigs: getTreeByPath(projectId, branch, constants.RULES_CONFIGS_DIRECTORY),
+    resourceServers: getTreeByPath(projectId, branch, constants.RESOURCE_SERVERS_DIRECTORY)
   };
 
   return Promise.props(promises)
-    .then((result) => (_.union(result.rules, result.connections, result.pages, result.clients, result.rulesConfigs, result.resourceServers)));
+    .then((result) => (_.union(
+      result.rules,
+      result.databases,
+      result.emails,
+      result.pages,
+      result.clients,
+      result.clientGrants,
+      result.connections,
+      result.rulesConfigs,
+      result.resourceServers
+    )));
 };
 
 /*
@@ -493,60 +519,66 @@ const getDatabaseScripts = (projectId, branch, files) => {
 };
 
 /*
- * Download a single page script.
+ * Download a single page or email script.
  */
-const downloadPage = (projectId, branch, pageName, page) => {
+const downloadTemplate = (projectId, branch, tplName, template) => {
   const downloads = [];
-  const currentPage = {
+  const currentTpl = {
     metadata: false,
-    name: pageName
+    name: tplName
   };
 
-  if (page.file) {
-    downloads.push(downloadFile(projectId, branch, page.file)
+  if (template.file) {
+    downloads.push(downloadFile(projectId, branch, template.file)
       .then(file => {
-        currentPage.htmlFile = file.contents;
+        currentTpl.htmlFile = file.contents;
       }));
   }
 
-  if (page.meta_file) {
-    downloads.push(downloadFile(projectId, branch, page.meta_file)
+  if (template.meta_file) {
+    downloads.push(downloadFile(projectId, branch, template.meta_file)
       .then(file => {
-        currentPage.metadata = true;
-        currentPage.metadataFile = file.contents;
+        currentTpl.metadata = true;
+        currentTpl.metadataFile = file.contents;
       }));
   }
 
   return Promise.all(downloads)
-    .then(() => currentPage);
+    .then(() => currentTpl);
 };
 
 /*
- * Get all pages.
+ * Get all html templates - emails/pages.
  */
-const getPages = (projectId, branch, files) => {
-  const pages = {};
+const getHtmlTemplates = (projectId, branch, files, dir, allowedNames) => {
+  const templates = {};
 
   // Determine if we have the script, the metadata or both.
-  _.filter(files, f => isPage(f.path)).forEach(file => {
-    const pageName = path.parse(file.path).name;
+  _.filter(files, f => isTemplates(f.path, dir, allowedNames)).forEach(file => {
+    const tplName = path.parse(file.path).name;
     const ext = path.parse(file.path).ext;
-    pages[pageName] = pages[pageName] || {};
+    templates[tplName] = templates[tplName] || {};
 
     if (ext !== '.json') {
-      pages[pageName].file = file;
-      pages[pageName].sha = file.sha;
-      pages[pageName].path = file.path;
+      templates[tplName].file = file;
+      templates[tplName].sha = file.sha;
+      templates[tplName].path = file.path;
     } else {
-      pages[pageName].meta_file = file;
-      pages[pageName].meta_sha = file.sha;
-      pages[pageName].meta_path = file.path;
+      templates[tplName].meta_file = file;
+      templates[tplName].meta_sha = file.sha;
+      templates[tplName].meta_path = file.path;
     }
   });
 
-  return Promise.map(Object.keys(pages), (pageName) =>
-    downloadPage(projectId, branch, pageName, pages[pageName]), { concurrency: 2 });
+  return Promise.map(Object.keys(templates), (name) =>
+    downloadTemplate(projectId, branch, name, templates[name]), { concurrency: 2 });
 };
+
+/*
+ * Get email provider.
+ */
+const getEmailProvider = (projectId, branch, files) =>
+  downloadConfigurable(projectId, branch, 'emailProvider', { configFile: _.find(files, f => isEmailProvider(f.path)) });
 
 /*
  * Get a list of all changes that need to be applied to rules and database scripts.
@@ -559,8 +591,12 @@ export const getChanges = (projectId, branch) =>
       const promises = {
         rules: getRules(projectId, branch, files),
         databases: getDatabaseScripts(projectId, branch, files),
-        pages: getPages(projectId, branch, files),
+        emailProvider: getEmailProvider(projectId, branch, files),
+        emailTemplates: getHtmlTemplates(projectId, branch, files, constants.EMAIL_TEMPLATES_DIRECTORY, constants.EMAIL_TEMPLATES_NAMES),
+        pages: getHtmlTemplates(projectId, branch, files, constants.PAGES_DIRECTORY, constants.PAGE_NAMES),
         clients: getConfigurables(projectId, branch, files, constants.CLIENTS_DIRECTORY),
+        clientGrants: getConfigurables(projectId, branch, files, constants.CLIENTS_GRANTS_DIRECTORY),
+        connections: getConfigurables(projectId, branch, files, constants.CONNECTIONS_DIRECTORY),
         rulesConfigs: getConfigurables(projectId, branch, files, constants.RULES_CONFIGS_DIRECTORY),
         resourceServers: getConfigurables(projectId, branch, files, constants.RESOURCE_SERVERS_DIRECTORY)
       };
