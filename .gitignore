@@ -6,3 +6,4 @@ npm-debug.log
 .nyc_output
 server/config.json
 server/data.json
+dist
