@@ -7,7 +7,7 @@
   },
   "main": "server.js",
   "scripts": {
-    "build": "npm run clean && npm run client:build && npm run extension:build && npm run extension:bundle",
+    "build": "npm run clean && npm run client:build && npm run extension:build",
     "clean": "rimraf dist",
     "client:build": "npm run clean && cross-env NODE_ENV=production webpack --config ./build/webpack/config.prod.js --colors -p",
     "extension:build": "a0-ext build:server ./webtask.js ./dist && cp ./dist/auth0-gitlab-deploy.extension.$npm_package_version.js ./build/bundle.js",
