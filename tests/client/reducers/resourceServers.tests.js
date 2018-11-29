@@ -1,5 +1,5 @@
 import expect from 'expect';
-import { rules } from '../../../client/reducers/rules';
+import { resourceServers } from '../../../client/reducers/resourceServers';
 import * as constants from '../../../client/constants';
 
 const initialState = {
@@ -10,19 +10,19 @@ const initialState = {
   notificationType: 'success'
 };
 
-describe('rules reducer', () => {
+describe('resourceServers reducer', () => {
   it('should return the initial state', () => {
     expect(
-      rules(undefined, {}).toJSON()
+      resourceServers(undefined, {}).toJSON()
     ).toEqual(
       initialState
     );
   });
 
-  it('should handle FETCH_RULES_PENDING', () => {
+  it('should handle FETCH_RESOURCE_SERVERS_PENDING', () => {
     expect(
-      rules(initialState, {
-        type: constants.FETCH_RULES_PENDING
+      resourceServers(initialState, {
+        type: constants.FETCH_RESOURCE_SERVERS_PENDING
       }).toJSON()
     ).toEqual(
       {
@@ -35,16 +35,16 @@ describe('rules reducer', () => {
     );
   });
 
-  it('should handle FETCH_RULES_REJECTED', () => {
+  it('should handle FETCH_RESOURCE_SERVERS_REJECTED', () => {
     expect(
-      rules(initialState, {
-        type: constants.FETCH_RULES_REJECTED,
+      resourceServers(initialState, {
+        type: constants.FETCH_RESOURCE_SERVERS_REJECTED,
         errorMessage: 'ERROR'
       }).toJSON()
     ).toEqual(
       {
         loading: false,
-        error: 'An error occurred while loading the rules: ERROR',
+        error: 'An error occurred while loading the resourceServers: ERROR',
         records: {},
         showNotification: false,
         notificationType: 'success'
@@ -52,10 +52,10 @@ describe('rules reducer', () => {
     );
   });
 
-  it('should handle FETCH_RULES_FULFILLED', () => {
+  it('should handle FETCH_RESOURCE_SERVERS_FULFILLED', () => {
     expect(
-      rules(initialState, {
-        type: constants.FETCH_RULES_FULFILLED,
+      resourceServers(initialState, {
+        type: constants.FETCH_RESOURCE_SERVERS_FULFILLED,
         payload: {
           data: [
             {
@@ -83,16 +83,16 @@ describe('rules reducer', () => {
     );
   });
 
-  it('should handle UPDATE_MANUAL_RULES_REJECTED', () => {
+  it('should handle UPDATE_MANUAL_RESOURCE_SERVERS_REJECTED', () => {
     expect(
-      rules(initialState, {
-        type: constants.UPDATE_MANUAL_RULES_REJECTED,
+      resourceServers(initialState, {
+        type: constants.UPDATE_MANUAL_RESOURCE_SERVERS_REJECTED,
         errorMessage: 'ERROR'
       }).toJSON()
     ).toEqual(
       {
         loading: false,
-        error: 'An error occurred while updating the rules: ERROR',
+        error: 'An error occurred while updating the resourceServers: ERROR',
         records: {},
         showNotification: false,
         notificationType: 'success'
@@ -100,10 +100,10 @@ describe('rules reducer', () => {
     );
   });
 
-  it('should handle OPEN_RULE_NOTIFICATION', () => {
+  it('should handle OPEN_RESOURCE_SERVER_NOTIFICATION', () => {
     expect(
-      rules(initialState, {
-        type: constants.OPEN_RULE_NOTIFICATION
+      resourceServers(initialState, {
+        type: constants.OPEN_RESOURCE_SERVER_NOTIFICATION
       }).toJSON()
     ).toEqual(
       {
@@ -116,10 +116,10 @@ describe('rules reducer', () => {
     );
   });
 
-  it('should handle CLOSE_RULE_NOTIFICATION', () => {
+  it('should handle CLOSE_RESOURCE_SERVER_NOTIFICATION', () => {
     expect(
-      rules(initialState, {
-        type: constants.CLOSE_RULE_NOTIFICATION
+      resourceServers(initialState, {
+        type: constants.CLOSE_RESOURCE_SERVER_NOTIFICATION
       }).toJSON()
     ).toEqual(
       {
