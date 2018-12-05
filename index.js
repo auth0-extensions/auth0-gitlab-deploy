@@ -2,12 +2,29 @@ const path = require('path');
 const nconf = require('nconf');
 const logger = require('./server/lib/logger');
 
-// Initialize babel.
-require('babel-core/register')({
-  ignore: /node_modules/,
-  sourceMaps: !(process.env.NODE_ENV === 'production')
+// eslint-disable-next-line import/no-extraneous-dependencies
+require('@babel/register')({
+  ignore: [ /node_modules/ ],
+  sourceMaps: !(process.env.NODE_ENV === 'production'),
+  plugins: [
+    '@babel/plugin-proposal-export-default-from',
+    '@babel/plugin-proposal-object-rest-spread'
+  ],
+  presets: [
+    [ '@babel/env', {
+      targets: {
+        node: 'current'
+      }
+    } ]
+  ]
 });
-require('babel-polyfill');
+// eslint-disable-next-line import/no-extraneous-dependencies
+require('@babel/polyfill');
+
+// Handle uncaught.
+process.on('uncaughtException', (err) => {
+  logger.error(err);
+});
 
 // Initialize configuration.
 nconf
@@ -23,8 +40,8 @@ nconf
 
 // Start the server.
 const app = require('./server')((key) => nconf.get(key), null);
-
 const port = nconf.get('PORT');
+
 app.listen(port, (error) => {
   if (error) {
     logger.error(error);
