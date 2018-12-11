@@ -9,7 +9,7 @@
   "scripts": {
     "build": "npm run clean && npm run client:build && npm run extension:build",
     "clean": "rimraf dist",
-    "client:build": "npm run clean && cross-env NODE_ENV=production webpack --config ./build/webpack/config.js --colors -p",
+    "client:build": "npm run clean && a0-ext build:client ./client/app.jsx ./dist",
     "extension:build": "a0-ext build:server ./webtask.js ./dist && cp ./dist/auth0-gitlab-deploy.extension.$npm_package_version.js ./build/bundle.js",
     "extension:size": "cross-env NODE_ENV=production webpack -p --config ./build/extension/webpack.config.js --json > ./build/extension/bundle-size.json && node ./build/extension/bundle-size.js",
     "lint:js": "eslint --ignore-path .gitignore --ignore-pattern build --ignore-pattern webpack .",
@@ -128,7 +128,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.2.0",
-    "auth0-extensions-cli": "^1.1.2",
+    "auth0-extensions-cli": "git+https://github.com/zxan1285/auth0-extensions-cli.git#client-build",
     "autoprefixer": "^6.5.1",
     "babel-eslint": "7.1.1",
     "babel-loader": "^8.0.4",
