@@ -1,7 +1,9 @@
-const devServer = require('auth0-extensions-cli/lib/dev-server');
+const { startDevServer } = require('auth0-extensions-cli');
 
 const rootPath = process.cwd();
 const entry = './client/app.jsx';
 const destination = './dist';
 
-devServer(rootPath, entry, destination);
+startDevServer(rootPath, entry, destination)
+  .then(() => require('../../index'))
+  .catch(() => process.exit(1));
