@@ -24,6 +24,7 @@ repository =>
     some other resource server.json
   database-connections
     my-connection-name
+      settings.json
       get_user.js
       login.js
   rules-configs
