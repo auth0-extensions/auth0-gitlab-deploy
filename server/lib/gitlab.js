@@ -175,7 +175,7 @@ const unifyData = (assets) => {
       result[type] = unifyItem(data, type);
     }
   });
-  console.log(result.databases);
+
   return result;
 };
 
