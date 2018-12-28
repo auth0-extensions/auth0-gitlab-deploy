@@ -111,10 +111,23 @@ const unifyItem = (item, type) => {
     }
 
     case 'databases': {
+      let settings = item.settings || {};
+      try {
+        settings = JSON.parse(item.settings);
+      } catch (e) {
+        logger.info(`Cannot parse settings of ${item.name} ${type}`);
+      }
       const customScripts = {};
+      const options = settings.options || {};
+
       _.forEach(item.scripts, (script) => { customScripts[script.name] = script.scriptFile; });
 
-      return ({ strategy: 'auth0', name: item.name, options: { customScripts, enabledDatabaseCustomization: true } });
+      if (item.scripts || item.scripts.length) {
+        options.customScripts = customScripts;
+        options.enabledDatabaseCustomization = true;
+      }
+
+      return ({ ...settings, options, strategy: 'auth0', name: item.name });
     }
 
     case 'resourceServers':
@@ -162,7 +175,7 @@ const unifyData = (assets) => {
       result[type] = unifyItem(data, type);
     }
   });
-
+  console.log(result.databases);
   return result;
 };
 
@@ -184,21 +197,26 @@ const getDatabaseScriptDetails = (filename) => {
   return null;
 };
 
+
 /*
- * Only Javascript and JSON files for Rules.
+ * Get the database settings file.
  */
-const validRulesOnly = (fileName) => /\.(js|json)$/i.test(fileName);
+const getDatabaseSettingsDetails = (filename) => {
+  const parts = filename.split('/');
+  const length = parts.length;
+  if (length >= 3 && parts[length - 1] === 'settings.json') {
+    return {
+      database: parts[length - 2],
+      name: 'settings'
+    };
+  }
+  return null;
+};
 
 /*
  * Only valid Javascript for Connections.
  */
-const validConnectionsOnly = (fileName) => /\.(js)$/i.test(fileName);
-
-/*
- * Only valid pages files
- */
-const validPagesOnly = (fileName) =>
-  constants.PAGE_NAMES.indexOf(fileName) >= 0;
+const validConnectionsOnly = (fileName) => /\.(js)$/i.test(fileName) || fileName === 'settings.json';
 
 /*
  * Only Javascript and JSON files.
@@ -223,8 +241,9 @@ const validFilesOnly = (fileName) => {
   } else if (isConfigurable(fileName, constants.RULES_CONFIGS_DIRECTORY)) {
     return /\.(js|json)$/i.test(fileName);
   } else if (isDatabaseConnection(fileName)) {
-    const script = getDatabaseScriptDetails(fileName);
-    return !!script;
+    const script = !!getDatabaseScriptDetails(fileName);
+    const settings = !!getDatabaseSettingsDetails(fileName);
+    return script || settings;
   }
   return false;
 };
@@ -484,10 +503,14 @@ const downloadDatabaseScript = (projectId, branch, databaseName, scripts) => {
   scripts.forEach(script => {
     downloads.push(downloadFile(projectId, branch, script)
       .then(file => {
-        database.scripts.push({
-          name: script.name,
-          scriptFile: file.contents
-        });
+        if (script.name === 'settings') {
+          database.settings = file.contents;
+        } else {
+          database.scripts.push({
+            name: script.name,
+            scriptFile: file.contents
+          });
+        }
       })
     );
   });
@@ -499,15 +522,26 @@ const downloadDatabaseScript = (projectId, branch, databaseName, scripts) => {
 /*
  * Get all database scripts.
  */
-const getDatabaseScripts = (projectId, branch, files) => {
+const getDatabaseData = (projectId, branch, files) => {
   const databases = {};
 
   _.filter(files, f => isDatabaseConnection(f.path)).forEach(file => {
     const script = getDatabaseScriptDetails(file.path);
+    const settings = getDatabaseSettingsDetails(file.path);
+
     if (script) {
       databases[script.database] = databases[script.database] || [];
       databases[script.database].push({
         ...script,
+        id: file.id,
+        path: file.path
+      });
+    }
+
+    if (settings) {
+      databases[settings.database] = databases[settings.database] || [];
+      databases[settings.database].push({
+        ...settings,
         id: file.id,
         path: file.path
       });
@@ -590,7 +624,7 @@ export const getChanges = (projectId, branch) =>
 
       const promises = {
         rules: getRules(projectId, branch, files),
-        databases: getDatabaseScripts(projectId, branch, files),
+        databases: getDatabaseData(projectId, branch, files),
         emailProvider: getEmailProvider(projectId, branch, files),
         emailTemplates: getHtmlTemplates(projectId, branch, files, constants.EMAIL_TEMPLATES_DIRECTORY, constants.EMAIL_TEMPLATES_NAMES),
         pages: getHtmlTemplates(projectId, branch, files, constants.PAGES_DIRECTORY, constants.PAGE_NAMES),
